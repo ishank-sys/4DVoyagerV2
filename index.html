@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Multi-File IFC Viewer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { 
+            height: 100vh; 
+            width: 100vw; 
+            overflow: hidden; 
+            font-family: sans-serif; 
+        }
+
+        /* NEW: Main flex container */
+        #app-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* MODIFIED: Viewer now takes 3 parts (75%) */
+        #viewer-container {
+            flex: 3; /* Takes 3 parts of the space */
+            height: 100%;
+            /* This is critical for the viewer to render */
+            position: relative; 
+        }
+        
+        /* NEW: Sidebar for controls */
+        #sidebar-container {
+            flex: 1; /* Takes 1 part of the space (25%) */
+            height: 100%;
+            background: #f4f4f4;
+            padding: 15px;
+            overflow-y: auto; /* Add scroll if controls get long */
+            border-left: 1px solid #ccc;
+        }
+
+        /* MODIFIED: Controls are no longer 'absolute' */
+        #controls-container {
+            /* We removed position: absolute and z-index */
+            display: flex;
+            flex-direction: column;
+            gap: 15px; /* More spacing */
+        }
+
+        #file-controls {
+            display: flex;
+            flex-direction: column; /* Stack file controls */
+            gap: 10px;
+        }
+        #file-input {
+            /* Make file input look better */
+            padding: 5px;
+        }
+        #load-button {
+            padding: 8px;
+            cursor: pointer;
+        }
+        
+        #slider-controls {
+            display: none; /* Still hidden by default */
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+        }
+
+        #slider-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+        
+        #model-slider {
+            width: 100%;
+            flex-grow: 1; /* Make slider fill available space */
+        }
+
+        #autoplay-button {
+            width: 35px; /* Slightly larger */
+            height: 30px;
+            padding: 0;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            flex-shrink: 0; /* Don't let button shrink */
+        }
+        #autoplay-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        #model-name-display {
+            font-size: 12px;
+            color: #333;
+            width: 100%; /* Fill sidebar width */
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-top: 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+
+        <div id="viewer-container"></div>
+
+        <div id="sidebar-container">
+
+            <div id="controls-container">
+                <div id="file-controls">
+                    <h3>Load Models</h3>
+                    <input type="file" id="file-input" accept=".ifc, .ifcXML, .ifcZIP" multiple>
+                    <button id="load-button">View IFC</button>
+                </div>
+        
+                <div id="slider-controls">
+                    <h3>Model Sequence</h3>
+                    <div id="slider-row">
+                        <input type="range" id="model-slider" min="0" max="0" value="0">
+                        <button id="autoplay-button" disabled>▶</button>
+                    </div>
+                    <span id="model-name-display">Loading...</span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script type="module" src="/index.js"></script>
+</body>
+</html>
