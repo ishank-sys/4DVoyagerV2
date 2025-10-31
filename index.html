@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Multi-File IFC Viewer</title>
+  <title>4D Voyager IFC Viewer</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
@@ -19,7 +19,7 @@
       padding-top: 64px;
     }
 
-    /* HEADER */
+    /* HEADER (translucent glass style) */
     #app-header {
       position: fixed;
       top: 0; left: 0; right: 0;
@@ -28,75 +28,30 @@
       align-items: center;
       justify-content: space-between;
       padding: 0 24px;
-      background: linear-gradient(180deg, rgba(7,12,20,0.25), rgba(2,6,10,0.75));
-      backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(7,12,20,0.25), rgba(2,6,10,0.6));
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
       z-index: 40;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+      border-image: linear-gradient(to right, rgba(0, 0, 0, 0.3), rgba(255,255,255,0.05)) 1;
     }
 
-    #app-header div {
-      display: flex;
-      align-items: center;
-    }
+    #app-header div { display: flex; align-items: center; }
 
-    #app-header button {
-      padding: 8px 14px;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.04);
-      color: #cfe6ff;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
+    /* VIEWER AREA */
+    #app-container { display: flex; width: 100%; height: 100%; }
 
-    #app-header button:hover {
-      background: rgba(43,156,255,0.2);
-      box-shadow: 0 0 10px rgba(43,156,255,0.4);
-    }
-
-    /* APP LAYOUT */
-    #app-container {
-      display: flex;
-      width: 100%;
-      height: 100%;
-    }
-
-    #viewer-container {
-  flex: 3;
-  height: 100%;
-  position: relative;
-
-  /* 👇 change this line */
-  background-color: #0b0f1e; /* Example: deep navy */
+    /* replace the current #viewer-container block in index.html with this */
+#viewer-container {
+  position: absolute;
+  top: 1px;    /* header height */
+  bottom: 1px;/* bottom bar height */
+  left: 0;
+  right: 0;
+  /* remove flex/height rules if present */
+  background-color: #0b0f1e;
 }
-
-
-    /* IFC LOADING BOX */
-    #floating-panel {
-      position: fixed;
-      left: 18px;
-      top: 84px;
-      background: rgba(12, 18, 40, 0.85);
-      padding: 14px;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.06);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-      backdrop-filter: blur(10px);
-      color: #cfe6ff;
-      min-width: 190px;
-      z-index: 30;
-      transition: all 0.3s ease;
-    }
-
-    #floating-panel input {
-      width: 100%;
-      padding: 6px;
-      border-radius: 6px;
-      border: 1px solid rgba(255,255,255,0.06);
-      background: rgba(255,255,255,0.05);
-      color: inherit;
-    }
 
     /* BOTTOM BAR */
     #bottom-bar {
@@ -115,7 +70,6 @@
       z-index: 35;
     }
 
-    /* Bottom small boxes */
     .bottom-box {
       background: rgba(8,14,30,0.6);
       padding: 10px 14px;
@@ -138,119 +92,108 @@
     #version-timeline { position: fixed; bottom: 25px; left: 25px; }
     #file-name-box { position: fixed; bottom: 25px; right: 25px; }
 
-    /* SLIDER styling */
+    /* SLIDER */
     #model-slider {
       width: 220px;
       accent-color: #2b9cff;
     }
-
     #model-slider::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #2b9cff;
-      border: 2px solid rgba(255,255,255,0.1);
-      box-shadow: 0 0 6px rgba(43,156,255,0.5);
-      transition: all 0.2s ease;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: #2b9cff; border: 2px solid rgba(255,255,255,0.1);
+      box-shadow: 0 0 6px rgba(43,156,255,0.5); transition: all 0.2s ease;
     }
-
     #model-slider:hover::-webkit-slider-thumb {
-      background: #4bb5ff;
-      transform: scale(1.15);
+      background: #4bb5ff; transform: scale(1.15);
     }
 
-    /* Overlay kept functional */
-    #loading-overlay {
+    /* FLOATING TABLE */
+    #progress-table {
       position: fixed;
-      left: 0; top: 0; right: 0; bottom: 0;
+      right: 25px;
+      top: 84px;
+      width: 560px;
+      max-height: 105vh;
+      overflow-y: auto;
+      background: rgba(8,14,30,0.5);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(43,156,255,0.25);
+      border-radius: 12px;
+      color: #cfe6ff;
+      z-index: 45;
+      box-shadow: 0 0 25px rgba(43,156,255,0.15);
+    }
+
+    #progress-table table { width: 100%; border-collapse: collapse; }
+    #progress-table th, #progress-table td {
+      padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.06);
+      text-align: left; font-size: 13px;
+    }
+    #progress-table th {
+      background: rgba(43,156,255,0.18);
+      font-weight: 600; color: #e6f4ff;
+      position: sticky; top: 0;
+    }
+    #progress-table tr:hover { background: rgba(43,156,255,0.15); cursor: pointer; }
+    #progress-table tr.active { background: rgba(43,156,255,0.3); }
+
+    /* LOADING OVERLAY */
+    #loading-overlay {
+      position: fixed; left: 0; top: 0; right: 0; bottom: 0;
       background: rgba(3,7,18,0.7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      color: #e6eef8;
-      font-size: 18px;
-      gap: 12px;
-      backdrop-filter: blur(6px);
-      visibility: hidden;
-      pointer-events: none;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999; color: #e6eef8; font-size: 18px; gap: 12px; backdrop-filter: blur(6px);
+      visibility: hidden; pointer-events: none;
     }
-
-    #loading-overlay.visible {
-      visibility: visible;
-      pointer-events: auto;
-    }
-
+    #loading-overlay.visible { visibility: visible; pointer-events: auto; }
     .spinner {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      border: 4px solid rgba(255,255,255,0.08);
-      border-top-color: #2b9cff;
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 4px solid rgba(255,255,255,0.08); border-top-color: #2b9cff;
       animation: spin 1s linear infinite;
     }
-
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
-  <!-- Header -->
+  <!-- HEADER -->
   <header id="app-header">
     <div style="gap:12px;">
-      <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#102a56,#1e3a8a);display:flex;align-items:center;justify-content:center;font-weight:700;color:white;">IFC</div>
-      <div style="margin-left:10px;font-weight:600;">4D Voyager</div>
-    </div>
-    <div style="display:flex;align-items:center;gap:12px;">
-      <!--<button id="view-source">View Source</button>
-       Theme switch removed -->
+      <div style="width:106px;height:42px;border-radius:4px;background:linear-gradient(135deg,#1c3a72,#2563eb);display:flex;align-items:center;justify-content:center;font-weight:700;color:white;box-shadow:0 0 10px rgba(43,156,255,0.4);">4D Voyager</div>
+      <div style="margin-left:10px;font-weight:600;"></div>
     </div>
   </header>
 
+  <!-- VIEWER -->
   <div id="app-container">
     <div id="viewer-container"></div>
   </div>
 
-  <!-- IFC loading panel 
-  <div id="floating-panel">
-    <div style="font-size:12px;opacity:0.8;margin-bottom:6px;">Show installed by</div>
-    <input placeholder="mm / dd / yyyy" />
-    <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
-      <div style="width:10px;height:10px;border-radius:2px;background:#f66"></div>
-      <div style="font-size:12px;opacity:0.85;">Fabricated</div>
-    </div>
-    <div style="margin-top:6px;font-size:12px;opacity:0.8;">Loading IFC...</div>
-  </div> -->
+  <!-- PROGRESS TABLE -->
+  <div id="progress-table">
+    <table>
+      <thead>
+        <tr>
+          <th>S.No.</th><th>Member</th>
+          <th>Fabrication Start</th><th>Fabrication Completion</th>
+          <th>Erection Start</th><th>Erection Completion</th>
+        </tr>
+      </thead>
+      <tbody id="progress-tbody"></tbody>
+    </table>
+  </div>
 
-  <!-- Main Bottom Bar -->
+  <!-- BOTTOM BAR -->
   <div id="bottom-bar">
-  <div id="version-timeline" class="bottom-box">
-    <input type="range" id="model-slider" min="0" max="0" value="0" />
-    <button id="autoplay-button" title="Play / Pause" style="
-      width: 40px;
-      height: 36px;
-      border-radius: 8px;
-      border: 1px solid rgba(43,156,255,0.25);
-      background: rgba(43,156,255,0.15);
-      color: #cfe6ff;
-      margin-left: 10px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 0 8px rgba(43,156,255,0.25);
-    ">▶</button>
+    <div id="version-timeline" class="bottom-box">
+      <input type="range" id="model-slider" min="0" max="0" value="0" />
+      <span id="slider-date" style="margin-left:10px;opacity:0.8;font-size:13px;"></span>
+      <button id="autoplay-button" style="width:40px;height:36px;border-radius:8px;border:1px solid rgba(43,156,255,0.25);background:rgba(43,156,255,0.15);color:#cfe6ff;margin-left:10px;cursor:pointer;box-shadow:0 0 8px rgba(43,156,255,0.25);">▶</button>
+    </div>
+    <div id="file-name-box" class="bottom-box"><span id="model-name-display">Loading...</span></div>
   </div>
 
-  <div id="file-name-box" class="bottom-box">
-    <span id="model-name-display">Loading...</span>
-  </div>
-</div>
-
-
-  <!-- Loading overlay (unchanged, functional) -->
-  <div id="loading-overlay">
-    <div class="spinner" aria-hidden="true"></div>
-    <div id="loading-text">Loading models... 0%</div>
-  </div>
+  <!-- LOADING OVERLAY -->
+  <div id="loading-overlay"><div class="spinner"></div><div id="loading-text">Loading models... 0%</div></div>
 
   <script type="module" src="/index.js"></script>
 </body>
