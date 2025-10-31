@@ -1,143 +1,257 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Multi-File IFC Viewer</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { 
-            height: 100vh; 
-            width: 100vw; 
-            overflow: hidden; 
-            font-family: sans-serif; 
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Multi-File IFC Viewer</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
 
-        /* NEW: Main flex container */
-        #app-container {
-            display: flex;
-            width: 100%;
-            height: 100%;
-        }
+    body {
+      background: radial-gradient(circle at 30% 30%, #0f172a, #030712 70%);
+      color: #e6eef8;
+      padding-top: 64px;
+    }
 
-        /* MODIFIED: Viewer now takes 3 parts (75%) */
-        #viewer-container {
-            flex: 3; /* Takes 3 parts of the space */
-            height: 100%;
-            /* This is critical for the viewer to render */
-            position: relative; 
-        }
-        
-        /* NEW: Sidebar for controls */
-        #sidebar-container {
-            flex: 1; /* Takes 1 part of the space (25%) */
-            height: 100%;
-            background: #f4f4f4;
-            padding: 15px;
-            overflow-y: auto; /* Add scroll if controls get long */
-            border-left: 1px solid #ccc;
-        }
+    /* HEADER */
+    #app-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: linear-gradient(180deg, rgba(7,12,20,0.25), rgba(2,6,10,0.75));
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      z-index: 40;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+    }
 
-        /* MODIFIED: Controls are no longer 'absolute' */
-        #controls-container {
-            /* We removed position: absolute and z-index */
-            display: flex;
-            flex-direction: column;
-            gap: 15px; /* More spacing */
-        }
+    #app-header div {
+      display: flex;
+      align-items: center;
+    }
 
-        #file-controls {
-            display: flex;
-            flex-direction: column; /* Stack file controls */
-            gap: 10px;
-        }
-        #file-input {
-            /* Make file input look better */
-            padding: 5px;
-        }
-        #load-button {
-            padding: 8px;
-            cursor: pointer;
-        }
-        
-        #slider-controls {
-            display: none; /* Still hidden by default */
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            border-top: 1px solid #ddd;
-            padding-top: 15px;
-        }
+    #app-header button {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      color: #cfe6ff;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
 
-        #slider-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            width: 100%;
-        }
-        
-        #model-slider {
-            width: 100%;
-            flex-grow: 1; /* Make slider fill available space */
-        }
+    #app-header button:hover {
+      background: rgba(43,156,255,0.2);
+      box-shadow: 0 0 10px rgba(43,156,255,0.4);
+    }
 
-        #autoplay-button {
-            width: 35px; /* Slightly larger */
-            height: 30px;
-            padding: 0;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            flex-shrink: 0; /* Don't let button shrink */
-        }
-        #autoplay-button:disabled {
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
+    /* APP LAYOUT */
+    #app-container {
+      display: flex;
+      width: 100%;
+      height: 100%;
+    }
 
-        #model-name-display {
-            font-size: 12px;
-            color: #333;
-            width: 100%; /* Fill sidebar width */
-            text-align: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            padding-top: 5px;
-        }
+    #viewer-container {
+  flex: 3;
+  height: 100%;
+  position: relative;
 
-    </style>
+  /* 👇 change this line */
+  background-color: #0b0f1e; /* Example: deep navy */
+}
+
+
+    /* IFC LOADING BOX */
+    #floating-panel {
+      position: fixed;
+      left: 18px;
+      top: 84px;
+      background: rgba(12, 18, 40, 0.85);
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
+      color: #cfe6ff;
+      min-width: 190px;
+      z-index: 30;
+      transition: all 0.3s ease;
+    }
+
+    #floating-panel input {
+      width: 100%;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.05);
+      color: inherit;
+    }
+
+    /* BOTTOM BAR */
+    #bottom-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 100px;
+      background: linear-gradient(180deg, rgba(7,12,20,0.2), rgba(2,6,10,0.7));
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 30px;
+      z-index: 35;
+    }
+
+    /* Bottom small boxes */
+    .bottom-box {
+      background: rgba(8,14,30,0.6);
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(43,156,255,0.25);
+      color: #cfe6ff;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 0 10px rgba(43,156,255,0.1);
+      transition: all 0.25s ease;
+    }
+
+    .bottom-box:hover {
+      box-shadow: 0 0 15px rgba(43,156,255,0.4);
+      transform: translateY(-2px);
+    }
+
+    #version-timeline { position: fixed; bottom: 25px; left: 25px; }
+    #file-name-box { position: fixed; bottom: 25px; right: 25px; }
+
+    /* SLIDER styling */
+    #model-slider {
+      width: 220px;
+      accent-color: #2b9cff;
+    }
+
+    #model-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #2b9cff;
+      border: 2px solid rgba(255,255,255,0.1);
+      box-shadow: 0 0 6px rgba(43,156,255,0.5);
+      transition: all 0.2s ease;
+    }
+
+    #model-slider:hover::-webkit-slider-thumb {
+      background: #4bb5ff;
+      transform: scale(1.15);
+    }
+
+    /* Overlay kept functional */
+    #loading-overlay {
+      position: fixed;
+      left: 0; top: 0; right: 0; bottom: 0;
+      background: rgba(3,7,18,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      color: #e6eef8;
+      font-size: 18px;
+      gap: 12px;
+      backdrop-filter: blur(6px);
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    #loading-overlay.visible {
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 4px solid rgba(255,255,255,0.08);
+      border-top-color: #2b9cff;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
 </head>
 <body>
-
-    <div id="app-container">
-
-        <div id="viewer-container"></div>
-
-        <div id="sidebar-container">
-
-            <div id="controls-container">
-                <div id="file-controls">
-                    <h3>Load Models</h3>
-                    <input type="file" id="file-input" accept=".ifc, .ifcXML, .ifcZIP" multiple>
-                    <button id="load-button">View IFC</button>
-                </div>
-        
-                <div id="slider-controls">
-                    <h3>Model Sequence</h3>
-                    <div id="slider-row">
-                        <input type="range" id="model-slider" min="0" max="0" value="0">
-                        <button id="autoplay-button" disabled>▶</button>
-                    </div>
-                    <span id="model-name-display">Loading...</span>
-                </div>
-            </div>
-
-        </div>
-
+  <!-- Header -->
+  <header id="app-header">
+    <div style="gap:12px;">
+      <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#102a56,#1e3a8a);display:flex;align-items:center;justify-content:center;font-weight:700;color:white;">IFC</div>
+      <div style="margin-left:10px;font-weight:600;">4D Voyager</div>
     </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <!--<button id="view-source">View Source</button>
+       Theme switch removed -->
+    </div>
+  </header>
 
-    <script type="module" src="/index.js"></script>
+  <div id="app-container">
+    <div id="viewer-container"></div>
+  </div>
+
+  <!-- IFC loading panel 
+  <div id="floating-panel">
+    <div style="font-size:12px;opacity:0.8;margin-bottom:6px;">Show installed by</div>
+    <input placeholder="mm / dd / yyyy" />
+    <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
+      <div style="width:10px;height:10px;border-radius:2px;background:#f66"></div>
+      <div style="font-size:12px;opacity:0.85;">Fabricated</div>
+    </div>
+    <div style="margin-top:6px;font-size:12px;opacity:0.8;">Loading IFC...</div>
+  </div> -->
+
+  <!-- Main Bottom Bar -->
+  <div id="bottom-bar">
+  <div id="version-timeline" class="bottom-box">
+    <input type="range" id="model-slider" min="0" max="0" value="0" />
+    <button id="autoplay-button" title="Play / Pause" style="
+      width: 40px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid rgba(43,156,255,0.25);
+      background: rgba(43,156,255,0.15);
+      color: #cfe6ff;
+      margin-left: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 8px rgba(43,156,255,0.25);
+    ">▶</button>
+  </div>
+
+  <div id="file-name-box" class="bottom-box">
+    <span id="model-name-display">Loading...</span>
+  </div>
+</div>
+
+
+  <!-- Loading overlay (unchanged, functional) -->
+  <div id="loading-overlay">
+    <div class="spinner" aria-hidden="true"></div>
+    <div id="loading-text">Loading models... 0%</div>
+  </div>
+
+  <script type="module" src="/index.js"></script>
 </body>
 </html>

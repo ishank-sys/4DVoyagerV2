@@ -1,4 +1,5 @@
 import { IfcViewerAPI } from 'web-ifc-viewer';
+import * as THREE from 'three';
 
 // Get the <div> element from the HTML
 const container = document.getElementById('viewer-container');
@@ -6,14 +7,39 @@ const container = document.getElementById('viewer-container');
 // Initialize the viewer
 const viewer = new IfcViewerAPI({ container });
 
-// Add some basic grid and axes helpers
+// --- CRITICAL STEP: Set the WASM path FIRST ---
+viewer.IFC.setWasmPath("./");
+
+// ✅ Safe background color setup using CSS hex string
+function setViewerBackground(color = "#0b0f1e", retries = 30) {
+  try {
+    const renderer =
+      viewer.context.getRenderer?.() || viewer.context.renderer;
+
+    if (renderer && viewer.context.scene) {
+      renderer.setClearColor(new THREE.Color(color), 1);
+      viewer.context.scene.background = new THREE.Color(color);
+      console.log("✅ Viewer background applied:", color);
+    } else if (retries > 0) {
+      setTimeout(() => setViewerBackground(color, retries - 1), 100);
+    } else {
+      console.warn("Viewer not ready for background color.");
+    }
+  } catch (err) {
+    console.error("Error setting background:", err);
+  }
+}
+
+// Run after a short delay to ensure internals are ready
+setTimeout(() => setViewerBackground("#0b0f1e"), 300);
+
+// Add grid and axes helpers (kept functional)
 viewer.grid.setGrid();
 viewer.axes.setAxes();
 
-// --- CRITICAL STEP: Set the WASM path ---
-viewer.IFC.setWasmPath("./");
 
-// --- CORRECTED: Auto-Rotation Logic ---
+
+// --- Auto-Rotation Logic (unchanged) ---
 function initializeAutoRotation() {
     console.log("Activating auto-rotation logic..."); // For debugging
     
@@ -31,167 +57,232 @@ function initializeAutoRotation() {
         }
         
         // THEN, update the controls.
-        // This forces controls.update() to run every frame,
-        // which is required for auto-rotation to work.
         controls.update(); 
     };
 
-    // Now, set up the rotation and event listeners
-    controls.autoRotate = true;      // Start rotating by default
-    controls.autoRotateSpeed = 1.0;  // Set rotation speed
+    controls.autoRotate = true;      
+    controls.autoRotateSpeed = 1.0;  
     
-    let autoRotateTimeout = null; // Timer for idle restart
+    let autoRotateTimeout = null;
 
-    // When user starts interacting (drag, zoom, pan)
     controls.addEventListener('start', () => {
-        clearTimeout(autoRotateTimeout); // Cancel any pending restart
-        controls.autoRotate = false;     // Stop rotation
+        clearTimeout(autoRotateTimeout);
+        controls.autoRotate = false;
     });
 
-    // When user stops interacting
     controls.addEventListener('end', () => {
-        // Wait 0.5 seconds (500ms) before resuming rotation
         clearTimeout(autoRotateTimeout);
         autoRotateTimeout = setTimeout(() => {
             controls.autoRotate = true;
-        }, 500); // Using your 500ms value
+        }, 500);
     });
 }
-// --- END Auto-Rotation Logic ---
 
-
-// --- Get ALL control elements ---
-const input = document.getElementById("file-input");
-const loadButton = document.getElementById("load-button");
+// --- DOM references ---
 const slider = document.getElementById("model-slider");
 const sliderControls = document.getElementById("slider-controls");
 const modelNameDisplay = document.getElementById("model-name-display");
 const autoplayButton = document.getElementById("autoplay-button");
+const themeToggle = document.getElementById("theme-toggle");
+const versionCounter = document.getElementById('version-counter');
+const versionTotal = document.getElementById('version-total');
+const autoplayStatus = document.getElementById('autoplay-status');
+const timelineThumb = document.getElementById('timeline-thumb');
+const loadingOverlay = document.getElementById('loading-overlay');
+const loadingText = document.getElementById('loading-text');
 
-// --- Array to store all loaded models ---
+function setLoadingPct(pct) {
+    try {
+        if (loadingText) loadingText.textContent = `Loading models... ${pct}%`;
+    } catch (e) {
+        console.warn('Could not set loading text', e);
+    }
+    if (loadingOverlay && typeof pct === 'number' && pct >= 100) {
+        loadingOverlay.classList.remove('visible');
+    }
+}
+
 let loadedModels = [];
 let autoplayTimer = null; 
-let rotationLogicInitialized = false; // NEW: Flag to run setup only once
+let rotationLogicInitialized = false;
 
-
-// --- Function to update visibility (Reversed Logic) ---
 function updateModelVisibility(index) {
     const sliderIndex = parseInt(index); 
     const maxIndex = loadedModels.length - 1;
-    const modelIndex = maxIndex - sliderIndex; // Slider 0 -> maxIndex
+    const modelIndex = maxIndex - sliderIndex; 
 
     if (modelIndex < 0 || modelIndex >= loadedModels.length) {
         return;
     }
 
-    // Loop through all loaded models
     loadedModels.forEach((data, i) => {
         const model = data.model; 
-        if (i === modelIndex) {
-            model.visible = true;
-        } else {
-            model.visible = false;
-        }
+        model.visible = (i === modelIndex);
     });
     
-    // Update the text label
     if (loadedModels[modelIndex]) {
         modelNameDisplay.textContent = loadedModels[modelIndex].name;
     }
+    if (versionCounter) versionCounter.textContent = String(sliderIndex + 1);
 }
 
-// --- Function to stop autoplay ---
 function stopAutoplay() {
     if (autoplayTimer) {
         clearInterval(autoplayTimer);
         autoplayTimer = null;
-        autoplayButton.textContent = "▶"; // Play icon
+        autoplayButton.textContent = "▶"; 
+        if (autoplayStatus) autoplayStatus.textContent = 'off';
     }
 }
 
-// --- Function to advance the slider ---
 function advanceSlider() {
-    if (loadedModels.length < 2) return; // Don't do anything if only 1 model
-    
+    if (loadedModels.length < 2) return; 
     const currentVal = parseInt(slider.value);
     const maxVal = parseInt(slider.max);
-    
     let nextVal = currentVal + 1;
-    if (nextVal > maxVal) {
-        nextVal = 0; // Loop back to the start
-    }
-    
+    if (nextVal > maxVal) nextVal = 0; 
     slider.value = nextVal;
     updateModelVisibility(nextVal);
 }
 
-// --- Autoplay button click listener ---
 autoplayButton.addEventListener("click", () => {
     if (autoplayTimer) {
-        // Autoplay is ON, stop it
         stopAutoplay();
     } else {
-        // Autoplay is OFF, start it
-        // First, advance once immediately
         advanceSlider(); 
-        // Then, set the interval
-        autoplayTimer = setInterval(advanceSlider, 2000); // 2s
-        autoplayButton.textContent = "❚❚"; // Pause icon
+        autoplayTimer = setInterval(advanceSlider, 2000);
+        autoplayButton.textContent = "❚❚"; 
+        if (autoplayStatus) autoplayStatus.textContent = 'on';
     }
 });
 
-// --- Slider 'input' listener ---
-slider.addEventListener("input", (event) => {
-    // Stop autoplay if user interacts with slider
-    stopAutoplay(); 
-    
-    updateModelVisibility(event.target.value);
-});
+// Keep dark theme by default (theme button removed in UI, but safe)
+document.body.classList.add('dark-mode');
 
+// --- Preload IFCs ---
+async function loadAllIfcs() {
+    stopAutoplay();
+    if (loadingOverlay) {
+        loadingOverlay.classList.add('visible');
+        setLoadingPct(0);
+    }
 
-// --- MODIFIED: Event Listener for loading files ---
-loadButton.addEventListener(
-    "click",
-    async () => {
-        // Stop autoplay when loading new files
-        stopAutoplay(); 
-
-        const files = input.files;
-        if (files.length === 0) {
-            alert("Please select at least one IFC file!");
-            return;
+    const baseFolder = '3D MODEL(step1)';
+    let names = [];
+    const manifestUrl = '/' + encodeURIComponent(baseFolder) + '/models.json';
+    try {
+        const manifestRes = await fetch(manifestUrl);
+        if (manifestRes.ok) {
+            const manifest = await manifestRes.json();
+            if (Array.isArray(manifest) && manifest.length > 0) {
+                names = manifest;
+            }
         }
+    } catch (err) {}
 
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
+    if (names.length === 0) {
+        const total = 10;
+        names = Array.from({ length: total }, (_, i) => `3D MODEL(step${i + 1}).ifc`);
+    }
+
+    const total = names.length;
+    modelNameDisplay.textContent = `Loading 0/${total}...`;
+
+    for (let i = 0; i < names.length; i++) {
+        const name = names[i];
+        const url = '/' + encodeURIComponent(baseFolder) + '/' + encodeURIComponent(name);
+        try {
+            modelNameDisplay.textContent = `Fetching ${i + 1}/${total}: ${name}`;
+            const res = await fetch(url);
+            if (!res.ok) {
+                console.warn('Failed to fetch', url, res.status);
+                const pctFail = Math.round(((i + 1) / total) * 100);
+                setLoadingPct(pctFail);
+                continue;
+            }
+            const arrayBuffer = await res.arrayBuffer();
+            const file = new File([arrayBuffer], name, { type: 'application/octet-stream' });
             const fitToCamera = (loadedModels.length === 0 && i === 0);
-            const model = await viewer.IFC.loadIfc(file, fitToCamera);
-            
-            // Add to the end of the array
-            loadedModels.push({ model: model, name: file.name });
-        }
-        
-        if (loadedModels.length > 0) {
-            slider.max = loadedModels.length - 1; 
-            sliderControls.style.display = "flex"; 
-            updateModelVisibility(slider.value);
 
-            // Enable/disable autoplay button
-            if (loadedModels.length > 1) {
-                autoplayButton.disabled = false;
-            } else {
-                autoplayButton.disabled = true;
+            const loadWithTimeout = (fileObj, fit, timeoutMs = 300) => {
+                return new Promise(async (resolve, reject) => {
+                    let finished = false;
+                    const timer = setTimeout(() => {
+                        if (!finished) {
+                            finished = true;
+                            reject(new Error('loadIfc timeout'));
+                        }
+                    }, timeoutMs);
+
+                    try {
+                        const model = await viewer.IFC.loadIfc(fileObj, fit);
+                        if (!finished) {
+                            finished = true;
+                            clearTimeout(timer);
+                            resolve(model);
+                        }
+                    } catch (err) {
+                        if (!finished) {
+                            finished = true;
+                            clearTimeout(timer);
+                            reject(err);
+                        }
+                    }
+                });
+            };
+
+            try {
+                const model = await loadWithTimeout(file, fitToCamera, 30000);
+                loadedModels.push({ model, name });
+            } catch (e) {
+                console.warn('Timeout or error loading IFC', name, e);
             }
 
-            // --- NEW: Initialize rotation logic ONCE ---
-            if (!rotationLogicInitialized) {
-                initializeAutoRotation();
-                rotationLogicInitialized = true;
+            if (loadingText) {
+                const pct = Math.round(((i + 1) / total) * 100);
+                setLoadingPct(pct);
             }
-            // --- END NEW ---
+        } catch (e) {
+            console.error('Error loading IFC', name, e);
         }
-        
-        input.value = null;
-    },
-    false
-);
+    }
+
+    if (loadedModels.length > 0) {
+        slider.max = loadedModels.length - 1;
+        sliderControls.style.display = 'flex';
+        updateModelVisibility(slider.value);
+        autoplayButton.disabled = loadedModels.length > 1 ? false : true;
+        if (versionTotal) versionTotal.textContent = String(loadedModels.length);
+        if (versionCounter) versionCounter.textContent = String(parseInt(slider.value) + 1);
+        if (autoplayStatus) autoplayStatus.textContent = autoplayButton.disabled ? 'off' : 'off';
+
+        if (!rotationLogicInitialized) {
+            initializeAutoRotation();
+            rotationLogicInitialized = true;
+        }
+    }
+
+    modelNameDisplay.textContent = loadedModels.length > 0 ? `${loadedModels.length} models loaded` : 'No models loaded';
+    if (loadingOverlay) {
+        loadingOverlay.classList.remove('visible');
+    }
+
+    function updateTimelineThumb() {
+        if (!timelineThumb || !slider) return;
+        const max = parseInt(slider.max) || 1;
+        const val = parseInt(slider.value) || 0;
+        const pct = (max === 0) ? 0 : (val / max) * 100;
+        timelineThumb.style.left = `calc(${pct}% - 9px)`;
+    }
+    updateTimelineThumb();
+
+    if (slider) {
+        slider.addEventListener('input', (event) => {
+            stopAutoplay();
+            updateModelVisibility(event.target.value);
+            updateTimelineThumb();
+        });
+    }
+}
+
+loadAllIfcs();
