@@ -18,21 +18,56 @@ function setViewerBackground(color = "#0b0f1e", retries = 30) {
   } catch {}
 }
 setTimeout(() => setViewerBackground("#0b0f1e"), 300);
+// Improve contrast so models retain brightness when overlay darkens background
+function configureRendererLook(retries = 30) {
+  try {
+    const renderer = viewer.context.getRenderer?.() || viewer.context.renderer;
+    if (renderer) {
+      // Prefer modern color space API when available
+      if ('outputColorSpace' in renderer) {
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+      } else if ('outputEncoding' in renderer) {
+        // Fallback for older three versions
+        renderer.outputEncoding = THREE.sRGBEncoding;
+      }
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.25; // lift highlights slightly
+    } else if (retries > 0) {
+      setTimeout(() => configureRendererLook(retries - 1), 100);
+    }
+  } catch {}
+}
+setTimeout(configureRendererLook, 350);
 viewer.grid.setGrid();
 viewer.axes.setAxes();
 
 const slider = document.getElementById("model-slider");
 const autoplayButton = document.getElementById("autoplay-button");
+const rotateButton = document.getElementById("rotate-button");
+const orbitBaseOffsetInput = document.getElementById('orbit-base-offset');
 const modelNameDisplay = document.getElementById("model-name-display");
 const loadingOverlay = document.getElementById("loading-overlay");
 const loadingText = document.getElementById("loading-text");
 const progressTbody = document.getElementById("progress-tbody");
 const sliderDate = document.getElementById("slider-date");
+const ISO_DATE_RE = /(20\d{2}-\d{2}-\d{2})/;
+// Read selected project from query param
+const urlProject = new URLSearchParams(location.search).get('project');
+const selectedProject = (urlProject || '').toUpperCase();
 
 let loadedModels = [];
 let autoplayTimer = null;
+// Disable autoplay until models are loaded to avoid iterating over an empty/default range
+if (autoplayButton) {
+  autoplayButton.disabled = true;
+  autoplayButton.title = 'Loading models…';
+}
+const DEFAULT_ORBIT_DURATION = 20000; // ms per full revolution
+const AUTOPLAY_DELAY_MS = 1500; // slight delay between frames
+let fileNameToIndex = new Map();
+let dateToIndex = new Map();
 
-const tableRowsData = [
+let tableRowsData = [
   ["Anchor Bolts 1","22/3/2025","26/3/2025","29/3/2025","1/4/2025"],
   ["Columns","23/3/2025","27/3/2025","30/3/2025","2/4/2025"],
   ["Braces","24/3/2025","28/3/2025","31/3/2025","3/4/2025"],
@@ -54,7 +89,42 @@ function buildProgressTable() {
   progressTbody.innerHTML = "";
   tableRowsData.forEach((r, i) => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${i+1}</td><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td>`;
+    // build cells manually to allow clickable date/file mapping
+    const cells = [String(i+1), r[0], r[1], r[2], r[3], r[4]];
+    cells.forEach((cell, ci) => {
+      const td = document.createElement("td");
+      if (ci === 0) {
+        td.textContent = String(i+1);
+      } else {
+        let text = cell;
+        let targetIndex = null;
+        if (cell && typeof cell === 'object') {
+          const label = cell.label ?? cell.text ?? cell.date ?? '-';
+          text = label;
+          if (Number.isInteger(cell.index)) targetIndex = cell.index;
+          if (cell.file && fileNameToIndex.has(cell.file)) targetIndex = fileNameToIndex.get(cell.file);
+          if (cell.date && dateToIndex.has(cell.date)) targetIndex = dateToIndex.get(cell.date);
+        } else if (typeof cell === 'string') {
+          // Match by date in text or exact filename
+          const m = cell.match(ISO_DATE_RE);
+          if (m && dateToIndex.has(m[1])) targetIndex = dateToIndex.get(m[1]);
+          if (fileNameToIndex.has(cell)) targetIndex = fileNameToIndex.get(cell);
+        }
+        td.textContent = (text == null ? '' : String(text));
+        if (targetIndex != null) {
+          td.style.color = '#4bb5ff';
+          td.style.cursor = 'pointer';
+          td.title = 'Jump to model for ' + td.textContent;
+          td.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            stopAutoplay();
+            slider.value = targetIndex;
+            updateModelVisibility(targetIndex);
+          });
+        }
+      }
+      tr.appendChild(td);
+    });
     tr.addEventListener("click", () => {
       stopAutoplay();
       slider.value = i;
@@ -83,6 +153,13 @@ function updateModelVisibility(index) {
   if (loadedModels[i]) modelNameDisplay.textContent = loadedModels[i].name;
   highlightTableRow(i);
   updateDateLabel(i);
+  // If auto-rotate is running in loop mode, retarget pivot to keep angle continuous
+  if (orbitState.running && orbitState.loop) {
+    const entry = loadedModels[i];
+    const model = entry?.model;
+    const baseYOffset = parseFloat(orbitBaseOffsetInput?.value || 0);
+    retargetPivotForModel(model, baseYOffset);
+  }
 }
 
 function stopAutoplay() {
@@ -93,8 +170,115 @@ function stopAutoplay() {
   }
 }
 
+// Orbit (360) state and helpers
+// Orbit (360) state and helpers. Supports single rotation or continuous looping.
+let orbitState = {
+  running: false,
+  rafId: null,
+  lastTime: 0,
+  speed: 0, // radians per ms
+  loop: false,
+  // Single reusable pivot so rotation continues across model changes
+  pivotRoot: null,
+  // Keep the current angle so swapping models doesn't reset
+  currentAngle: 0,
+  // Accumulator for single-rotation mode
+  singleAcc: 0
+};
+
+function retargetPivotForModel(model, baseYOffset = 0) {
+  if (!model) return null;
+  try {
+    const box = new THREE.Box3().setFromObject(model);
+    const pivotPoint = new THREE.Vector3();
+    // Use the model's base (min.y) + user offset as pivot Y
+    box.getCenter(pivotPoint);
+    pivotPoint.y = box.min.y + baseYOffset;
+
+    if (!orbitState.pivotRoot) {
+      orbitState.pivotRoot = new THREE.Object3D();
+      orbitState.pivotRoot.name = 'orbit-pivot-root';
+      viewer.context.scene.add(orbitState.pivotRoot);
+    }
+    const pivot = orbitState.pivotRoot;
+    pivot.position.copy(pivotPoint);
+    // Preserve current angle
+    pivot.rotation.y = orbitState.currentAngle || 0;
+    try {
+      // attach preserves world transform
+      pivot.attach(model);
+    } catch (e) {
+      // fallback: approximate relative parenting
+      model.position.sub(pivotPoint);
+      pivot.add(model);
+    }
+    return pivot;
+  } catch (e) {
+    console.warn('Pivot retarget failed', e);
+    return null;
+  }
+}
+
+function stopOrbit() {
+  if (!orbitState.running) return;
+  orbitState.running = false;
+  if (orbitState.rafId) cancelAnimationFrame(orbitState.rafId);
+  orbitState.rafId = null;
+  // Reset rotate button UI if present
+  try { if (rotateButton) rotateButton.textContent = "⟳"; } catch {}
+}
+
+function startOrbit(durationMs = 20000, loop = false) {
+  // start continuous or single rotation around computed pivot
+  stopOrbit();
+  const idx = parseInt(slider.value || 0);
+  const entry = loadedModels[idx];
+  if (!entry || !entry.model) return;
+  const model = entry.model;
+  const baseYOffset = parseFloat(orbitBaseOffsetInput?.value || 0);
+  const pivot = retargetPivotForModel(model, baseYOffset);
+  // If retargeting fails, continue with direct model rotation as a fallback
+  const renderer = viewer.context.getRenderer?.() || viewer.context.renderer;
+  orbitState.running = true;
+  orbitState.lastTime = performance.now();
+  orbitState.loop = Boolean(loop);
+  orbitState.speed = (Math.PI * 2) / durationMs; // radians per ms
+  orbitState.singleAcc = 0; // for single-rotation mode only
+  try { if (rotateButton) rotateButton.textContent = "⏹"; } catch {}
+
+  function frame(now) {
+    if (!orbitState.running) return;
+    const delta = now - orbitState.lastTime;
+    orbitState.lastTime = now;
+    const angle = orbitState.speed * delta;
+    // rotate pivot (if present) otherwise rotate model
+    try {
+      orbitState.currentAngle += angle;
+      if (pivot) pivot.rotation.y = orbitState.currentAngle;
+      else model.rotation.y = orbitState.currentAngle;
+      if (renderer && viewer.context.scene && viewer.context.camera) {
+        renderer.render(viewer.context.scene, viewer.context.camera);
+      }
+    } catch (e) {}
+    // If not looping and have rotated >= 2pi since start, stop.
+    if (!orbitState.loop) {
+      orbitState.singleAcc += angle;
+      if (orbitState.singleAcc >= Math.PI * 2) {
+        orbitState.singleAcc = 0;
+        stopOrbit();
+        return;
+      }
+    }
+    orbitState.rafId = requestAnimationFrame(frame);
+  }
+
+  orbitState.rafId = requestAnimationFrame(frame);
+}
+
 function advanceSlider() {
-  const maxVal = parseInt(slider.max);
+  // Use the actual loaded models length instead of the slider's max attribute,
+  // which may be a placeholder value before models finish loading.
+  const maxVal = Math.max(0, (loadedModels?.length || 0) - 1);
   let nextVal = parseInt(slider.value) + 1;
   if (nextVal > maxVal) nextVal = 0;
   slider.value = nextVal;
@@ -102,40 +286,166 @@ function advanceSlider() {
 }
 
 autoplayButton.addEventListener("click", () => {
-  if (autoplayTimer) stopAutoplay();
-  else {
-    advanceSlider();
-    autoplayTimer = setInterval(advanceSlider, 2000);
+  if (autoplayButton.disabled) return; // still loading
+  if ((loadedModels?.length || 0) <= 1) return; // nothing to iterate
+  if (autoplayTimer) {
+    stopAutoplay();
+    // Pause should only pause autoplay now; rotation remains as-is
+  } else {
+    // Start interval without an immediate jump; first switch happens after the delay
+    autoplayTimer = setInterval(advanceSlider, AUTOPLAY_DELAY_MS);
     autoplayButton.textContent = "❚❚";
   }
 });
 
+if (rotateButton) {
+  rotateButton.addEventListener("click", () => {
+    if (orbitState.running) {
+      stopOrbit();
+      rotateButton.textContent = "⟳";
+    } else {
+      startOrbit(DEFAULT_ORBIT_DURATION, true);
+      rotateButton.textContent = "⏹";
+    }
+  });
+}
+
 slider.addEventListener("input", (e) => updateModelVisibility(e.target.value));
 slider.addEventListener("change", () => stopAutoplay());
 
-async function loadAllIfcs() {
-  loadingOverlay.classList.add("visible");
-  const base = "3D MODEL(step1)";
-  const total = tableRowsData.length;
-  const names = Array.from({ length: total }, (_, i) => `BCMEOTest_day_${String(i).padStart(3, '0')}.ifc`);
-  for (let i = 0; i < names.length; i++) {
-    const name = names[i];
-    const url = "/" + encodeURIComponent(base) + "/" + encodeURIComponent(name);
+// If the base offset changes while rotating, retarget pivot without resetting angle
+if (orbitBaseOffsetInput) {
+  orbitBaseOffsetInput.addEventListener('change', () => {
+    if (orbitState.running && orbitState.loop) {
+      const idx = parseInt(slider.value || 0);
+      const model = loadedModels[idx]?.model;
+      const baseYOffset = parseFloat(orbitBaseOffsetInput.value || 0);
+      retargetPivotForModel(model, baseYOffset);
+    }
+  });
+}
+
+// Rotation is controlled by its own button (⟳) and is independent of autoplay.
+
+// Resolve the project base folder by probing for a models.json manifest.
+async function resolveProjectBase() {
+  const candidates = [];
+  if (selectedProject) {
+    // common patterns: /projects/BSGS or /BSGS
+    candidates.push(`projects/${selectedProject}`);
+    candidates.push(`${selectedProject}`);
+  }
+  // existing default folder
+  candidates.push("3D MODEL(step1)");
+
+  for (const base of candidates) {
     try {
-      const res = await fetch(url);
-      if (!res.ok) continue;
-      const buf = await res.arrayBuffer();
-      const file = new File([buf], name);
-      const model = await viewer.IFC.loadIfc(file, i === 0);
-      loadedModels.push({ model, name });
-      loadingText.textContent = `Loading models... ${Math.round(((i + 1) / total) * 100)}%`;
+      const manifestUrl = "/" + encodeURIComponent(base) + "/models.json";
+      const res = await fetch(manifestUrl, { cache: 'no-cache' });
+      if (res.ok) {
+        const list = await res.json().catch(() => null);
+        if (Array.isArray(list) && list.length) return { base, names: list };
+      }
     } catch {}
   }
-  if (loadedModels.length) {
-    slider.max = loadedModels.length - 1;
-    updateModelVisibility(0);
+  // Fallback: fabricate a standard 16-frame sequence in the default folder
+  const total = tableRowsData.length;
+  const names = Array.from({ length: total }, (_, i) => `BCMEOTest_day_${String(i).padStart(3, '0')}.ifc`);
+  return { base: "3D MODEL(step1)", names };
+}
+
+async function loadAllIfcs() {
+  loadingOverlay.classList.add("visible");
+  try {
+    // Figure out which folder to load from and which files
+    const { base, names } = await resolveProjectBase();
+    // Update document title subtly with project for clarity
+    if (selectedProject) {
+      try { document.title = `${selectedProject} | ` + document.title; } catch {}
+    }
+    // Try to load a per-project schedule.json to populate the table
+    await (async () => {
+    try {
+      const scheduleUrl = "/" + encodeURIComponent(base) + "/schedule.json";
+      const res = await fetch(scheduleUrl, { cache: 'no-cache' });
+      if (res.ok) {
+        const schedule = await res.json();
+        if (Array.isArray(schedule) && schedule.length) {
+          // Accept either array-of-arrays or array-of-objects
+          const rows = schedule.map((row, i) => {
+            if (Array.isArray(row)) return row.slice(0,5);
+            if (row && typeof row === 'object') {
+              // Allow object values in date fields to carry {date,file,index,label}
+              const fs = row.fabricationStart ?? row.fabrication_start ?? "-";
+              const fc = row.fabricationCompletion ?? row.fabrication_end ?? "-";
+              const es = row.erectionStart ?? row.erection_start ?? "-";
+              const ec = row.erectionCompletion ?? row.erection_end ?? "-";
+              return [
+                row.member ?? `Item ${i+1}`,
+                fs, fc, es, ec
+              ];
+            }
+            return [`Item ${i+1}`, "-","-","-","-"]; 
+          });
+          tableRowsData = rows;
+          buildProgressTable();
+          return;
+        }
+      }
+    } catch {}
+    // If no schedule, ensure the progress table has one row per IFC file
+    if (names.length !== tableRowsData.length) {
+      tableRowsData = names.map((n, i) => [
+        `Sequence ${i+1}`, "-", "-", "-", "-"
+      ]);
+      buildProgressTable();
+    }
+    })();
+    // Build fast lookups to make schedule cells clickable by date or file
+    fileNameToIndex = new Map();
+    dateToIndex = new Map();
+    names.forEach((fname, idx) => {
+      fileNameToIndex.set(fname, idx);
+      const m = fname.match(ISO_DATE_RE);
+      if (m) dateToIndex.set(m[1], idx);
+    });
+    // Rebuild table once lookups exist so clickable styles apply if no schedule
+    buildProgressTable();
+    const total = names.length;
+    let firstLoaded = true;
+    for (let i = 0; i < names.length; i++) {
+      const name = names[i];
+      const url = "/" + encodeURIComponent(base) + "/" + encodeURIComponent(name);
+      try {
+        const res = await fetch(url);
+        if (!res.ok) continue;
+        const buf = await res.arrayBuffer();
+        const file = new File([buf], name);
+        const model = await viewer.IFC.loadIfc(file, firstLoaded);
+        firstLoaded = false;
+        loadedModels.push({ model, name });
+        loadingText.textContent = `Loading models... ${Math.round(((i + 1) / total) * 100)}%`;
+      } catch (e) {
+        console.error('Failed to load IFC', name, e);
+      }
+    }
+    if (loadedModels.length) {
+      slider.max = loadedModels.length - 1;
+      try { updateModelVisibility(0); } catch (e) { console.warn('updateModelVisibility failed', e); }
+      // Enable autoplay now that we have something to play through
+      if (autoplayButton) {
+        autoplayButton.disabled = false;
+        autoplayButton.title = 'Play';
+      }
+    } else {
+      loadingText.textContent = 'No models loaded';
+    }
+  } finally {
+    // Always hide overlay to avoid stuck UI
+    loadingOverlay.classList.remove("visible");
+    // Soft failsafe hide after a short delay (just in case)
+    setTimeout(() => loadingOverlay.classList.remove('visible'), 1000);
   }
-  loadingOverlay.classList.remove("visible");
 }
 
 buildProgressTable();

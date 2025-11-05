@@ -3,198 +3,300 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>4D Voyager IFC Viewer</title>
+  <title>4D BIM Visualization | Able Steel – TSMC Project</title>
   <style>
+    :root {
+      --bg: #f9fafc;
+      --bg-secondary: #ffffff;
+      --text: #1e293b;
+      --text-muted: #475569;
+      --border: rgba(0, 0, 0, 0.08);
+      --brand: #2563eb;
+      --brand-light: #60a5fa;
+      --shadow: rgba(0, 0, 0, 0.05);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-secondary: #1e293b;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: rgba(255, 255, 255, 0.08);
+      --shadow: rgba(0, 0, 0, 0.5);
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
     html, body {
-      height: 100vh;
-      width: 100vw;
-      overflow: hidden;
-      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      height: 100%;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.4s ease, color 0.4s ease;
+      overflow-x: hidden;
     }
 
-    body {
-      background: radial-gradient(circle at 30% 30%, #0f172a, #030712 70%);
-      color: #e6eef8;
-      padding-top: 64px;
-    }
-
-    /* HEADER (translucent glass style) */
-    #app-header {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: 64px;
+    header {
+      position: sticky;
+      top: 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 24px;
-      background: linear-gradient(180deg, rgba(7,12,20,0.25), rgba(2,6,10,0.6));
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-      z-index: 40;
-      border-image: linear-gradient(to right, rgba(0, 0, 0, 0.3), rgba(255,255,255,0.05)) 1;
+      padding: 0 32px;
+      height: 72px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 2px 10px var(--shadow);
+      z-index: 100;
+      backdrop-filter: blur(8px);
+      transition: all 0.3s ease;
     }
 
-    #app-header div { display: flex; align-items: center; }
-
-    /* VIEWER AREA */
-    #app-container { display: flex; width: 100%; height: 100%; }
-
-    /* replace the current #viewer-container block in index.html with this */
-#viewer-container {
-  position: absolute;
-  top: 1px;    /* header height */
-  bottom: 1px;/* bottom bar height */
-  left: 0;
-  right: 0;
-  /* remove flex/height rules if present */
-  background-color: #0b0f1e;
-}
-
-    /* BOTTOM BAR */
-    #bottom-bar {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 100px;
-      background: linear-gradient(180deg, rgba(7,12,20,0.2), rgba(2,6,10,0.7));
-      backdrop-filter: blur(10px);
-      border-top: 1px solid rgba(255,255,255,0.06);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 30px;
-      z-index: 35;
-    }
-
-    .bottom-box {
-      background: rgba(8,14,30,0.6);
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: 1px solid rgba(43,156,255,0.25);
-      color: #cfe6ff;
-      font-size: 13px;
+    .brand {
       display: flex;
       align-items: center;
       gap: 10px;
-      box-shadow: 0 0 10px rgba(43,156,255,0.1);
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--brand);
+    }
+
+    .brand-logo {
+      background: linear-gradient(135deg, var(--brand), var(--brand-light));
+      color: white;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      font-weight: 700;
+      box-shadow: 0 2px 6px rgba(37,99,235,0.3);
+    }
+
+    header span {
+      font-size: 14px;
+      opacity: 0.8;
+      color: var(--text-muted);
+    }
+
+    /* Toggle Button */
+    .theme-toggle {
+      cursor: pointer;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle:hover {
+      background: var(--brand);
+      color: white;
+    }
+
+    main {
+      padding: 40px 24px 60px;
+      max-width: 1200px;
+      margin: 0 auto;
+      transition: color 0.3s ease, background 0.3s ease;
+    }
+
+    h1 {
+      font-size: clamp(22px, 3.5vw, 36px);
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .subtitle {
+      margin-top: 8px;
+      color: var(--text-muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 28px;
+      margin-top: 36px;
+    }
+
+    .card {
+      text-decoration: none;
+      color: inherit;
+      background: var(--bg-secondary);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 16px var(--shadow);
+      overflow: hidden;
       transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
     }
 
-    .bottom-box:hover {
-      box-shadow: 0 0 15px rgba(43,156,255,0.4);
-      transform: translateY(-2px);
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 8px 24px rgba(37,99,235,0.15);
+      border-color: var(--brand-light);
     }
 
-    #version-timeline { position: fixed; bottom: 25px; left: 25px; }
-    #file-name-box { position: fixed; bottom: 25px; right: 25px; }
-
-    /* SLIDER */
-    #model-slider {
-      width: 220px;
-      accent-color: #2b9cff;
-    }
-    #model-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 16px; height: 16px; border-radius: 50%;
-      background: #2b9cff; border: 2px solid rgba(255,255,255,0.1);
-      box-shadow: 0 0 6px rgba(43,156,255,0.5); transition: all 0.2s ease;
-    }
-    #model-slider:hover::-webkit-slider-thumb {
-      background: #4bb5ff; transform: scale(1.15);
+    .preview {
+      position: relative;
+      height: 180px;
+      background: linear-gradient(135deg, #e0ecff, #f1f5ff);
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
     }
 
-    /* FLOATING TABLE */
-    #progress-table {
-      position: fixed;
-      right: 25px;
-      top: 84px;
-      width: 560px;
-      max-height: 105vh;
-      overflow-y: auto;
-      background: rgba(8,14,30,0.5);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(43,156,255,0.25);
-      border-radius: 12px;
-      color: #cfe6ff;
-      z-index: 45;
-      box-shadow: 0 0 25px rgba(43,156,255,0.15);
+    [data-theme="dark"] .preview {
+      background: linear-gradient(135deg, #1e3a8a, #1e40af);
     }
 
-    #progress-table table { width: 100%; border-collapse: collapse; }
-    #progress-table th, #progress-table td {
-      padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.06);
-      text-align: left; font-size: 13px;
+    .preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
-    #progress-table th {
-      background: rgba(43,156,255,0.18);
-      font-weight: 600; color: #e6f4ff;
-      position: sticky; top: 0;
-    }
-    #progress-table tr:hover { background: rgba(43,156,255,0.15); cursor: pointer; }
-    #progress-table tr.active { background: rgba(43,156,255,0.3); }
 
-    /* LOADING OVERLAY */
-    #loading-overlay {
-      position: fixed; left: 0; top: 0; right: 0; bottom: 0;
-      background: rgba(3,7,18,0.7);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 9999; color: #e6eef8; font-size: 18px; gap: 12px; backdrop-filter: blur(6px);
-      visibility: hidden; pointer-events: none;
+    .preview .fallback {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 18px;
+      color: var(--brand);
+      letter-spacing: 0.4px;
     }
-    #loading-overlay.visible { visibility: visible; pointer-events: auto; }
-    .spinner {
-      width: 36px; height: 36px; border-radius: 50%;
-      border: 4px solid rgba(255,255,255,0.08); border-top-color: #2b9cff;
-      animation: spin 1s linear infinite;
+
+    .meta {
+      padding: 16px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .project {
+      font-weight: 600;
+      color: var(--text);
+      font-size: 15px;
+    }
+
+    .tonnage {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 50px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
   </style>
 </head>
+
 <body>
-  <!-- HEADER -->
-  <header id="app-header">
-    <div style="gap:12px;">
-      <div style="width:106px;height:42px;border-radius:4px;background:linear-gradient(135deg,#1c3a72,#2563eb);display:flex;align-items:center;justify-content:center;font-weight:700;color:white;box-shadow:0 0 10px rgba(43,156,255,0.4);">4D Voyager</div>
-      <div style="margin-left:10px;font-weight:600;"></div>
+  <header>
+    <div class="brand">
+      <div class="brand-logo">4D</div>
+      4D Voyager
     </div>
+    <span>Developed by Structures Online (SOL) for Able Steel</span>
+    <div class="theme-toggle" id="themeToggle" title="Toggle Theme">🌙</div>
   </header>
 
-  <!-- VIEWER -->
-  <div id="app-container">
-    <div id="viewer-container"></div>
-  </div>
+  <main>
+    <h1>4D BIM Visualization | Able Steel – TSMC Project</h1>
+    <div class="subtitle">Select a project to launch the interactive 4D Viewer.</div>
 
-  <!-- PROGRESS TABLE -->
-  <div id="progress-table">
-    <table>
-      <thead>
-        <tr>
-          <th>S.No.</th><th>Member</th>
-          <th>Fabrication Start</th><th>Fabrication Completion</th>
-          <th>Erection Start</th><th>Erection Completion</th>
-        </tr>
-      </thead>
-      <tbody id="progress-tbody"></tbody>
-    </table>
-  </div>
+    <section class="grid">
+      <a class="card" href="viewer.html?project=BSGS">
+        <div class="preview">
+          <img src="public/BSGS1.png" alt="BSGS Preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <span class="fallback">Preview</span>
+        </div>
+        <div class="meta">
+          <div class="project">Project: BSGS</div>
+          <div class="tonnage">Tonnage: —</div>
+        </div>
+      </a>
 
-  <!-- BOTTOM BAR -->
-  <div id="bottom-bar">
-    <div id="version-timeline" class="bottom-box">
-      <input type="range" id="model-slider" min="0" max="0" value="0" />
-      <span id="slider-date" style="margin-left:10px;opacity:0.8;font-size:13px;"></span>
-      <button id="autoplay-button" style="width:40px;height:36px;border-radius:8px;border:1px solid rgba(43,156,255,0.25);background:rgba(43,156,255,0.15);color:#cfe6ff;margin-left:10px;cursor:pointer;box-shadow:0 0 8px rgba(43,156,255,0.25);">▶</button>
-    </div>
-    <div id="file-name-box" class="bottom-box"><span id="model-name-display">Loading...</span></div>
-  </div>
+      <a class="card" href="viewer.html?project=CUP">
+        <div class="preview">
+          <img src="public/Waste.png" alt="CUP Preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <span class="fallback">Preview</span>
+        </div>
+        <div class="meta">
+          <div class="project">Project: Waste Mngm</div>
+          <div class="tonnage">Tonnage: —</div>
+        </div>
+      </a>
 
-  <!-- LOADING OVERLAY -->
-  <div id="loading-overlay"><div class="spinner"></div><div id="loading-text">Loading models... 0%</div></div>
+      <a class="card" href="viewer.html?project=LORRY">
+        <div class="preview">
+          <img src="public/lorry1.png" alt="LORRY Preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <span class="fallback">Preview</span>
+        </div>
+        <div class="meta">
+          <div class="project">Project: LORRY</div>
+          <div class="tonnage">Tonnage: —</div>
+        </div>
+      </a>
 
-  <script type="module" src="/index.js"></script>
+      <a class="card" href="viewer.html?project=WRC">
+        <div class="preview">
+          <img src="public/CS.png" alt="WRC Preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <span class="fallback">Preview</span>
+        </div>
+        <div class="meta">
+          <div class="project">Project: WRC</div>
+          <div class="tonnage">Tonnage: —</div>
+        </div>
+      </a>
+
+      <a class="card" href="viewer.html?project=WRC">
+        <div class="preview">
+          <img src="public/CS.png" alt="WRC Preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <span class="fallback">Preview</span>
+        </div>
+        <div class="meta">
+          <div class="project">Project: WRC</div>
+          <div class="tonnage">Tonnage: —</div>
+        </div>
+      </a>
+      <a class="card" href="viewer.html?project=WRC">
+        <div class="preview">
+          <img src="public/CS.png" alt="WRC Preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <span class="fallback">Preview</span>
+        </div>
+        <div class="meta">
+          <div class="project">Project: WRC</div>
+          <div class="tonnage">Tonnage: —</div>
+        </div>
+      </a>
+    </section>
+
+    <footer>© 2025 4D Voyager | Able Steel Project Dashboard</footer>
+  </main>
+
+  <script>
+    const toggleBtn = document.getElementById('themeToggle');
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    toggleBtn.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+
+    toggleBtn.addEventListener('click', () => {
+      const theme = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      toggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
+    });
+  </script>
 </body>
 </html>
