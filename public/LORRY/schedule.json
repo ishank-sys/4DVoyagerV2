@@ -1,0 +1,23 @@
+[
+  {
+    "member": "Anchor Bolts",
+    "fabricationStart": "2025-10-24",
+    "fabricationCompletion": "2025-10-31",
+    "erectionStart": { "date": "2025-11-01" },
+    "erectionCompletion": { "date": "2025-11-03" }
+  },
+  {
+    "member": "Columns Level 1",
+    "fabricationStart": { "label": "Fab D1", "date": "2025-11-04" },
+    "fabricationCompletion": { "date": "2025-11-07" },
+    "erectionStart": { "file": "BSGS 03 3D-Model-7_2025-11-08.ifc" },
+    "erectionCompletion": { "file": "BSGS 03 3D-Model-7_2025-11-10.ifc", "label": "EC L1" }
+  },
+  {
+    "member": "Beams (Area A)",
+    "fabricationStart": { "index": 20, "label": "Start (idx 20)" },
+    "fabricationCompletion": { "index": 25 },
+    "erectionStart": "2025-12-01",
+    "erectionCompletion": "2025-12-05"
+  }
+]
