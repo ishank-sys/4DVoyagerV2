@@ -1,0 +1,254 @@
+[
+  {
+    "member": "Columns Seq 101",
+    "fabricationStart": "2026-03-15",
+    "fabricationCompletion": "2026-03-17",
+    "erectionStart": { "date": "2026-03-15" },
+    "erectionCompletion": { "date": "2026-03-15" }
+  },
+  {
+    "member": "Beams Seq 101",
+    "fabricationStart": "2026-03-15",
+    "fabricationCompletion": "2026-03-17",
+    "erectionStart": { "date": "2026-03-16" },
+    "erectionCompletion": { "date": "2026-03-17" }
+  },
+  {
+    "member": "Misc Seq 101",
+    "fabricationStart": "2026-03-15",
+    "fabricationCompletion": "2026-03-17",
+    "erectionStart": { "date": "2026-03-18" },
+    "erectionCompletion": { "date": "2026-03-17" }
+  },
+  {
+    "member": "Columns Seq 201",
+    "fabricationStart": "2026-03-18",
+    "fabricationCompletion": "2026-03-20",
+    "erectionStart": { "date": "2026-03-18" },
+    "erectionCompletion": { "date": "2026-03-18" }
+  },
+  {
+    "member": "Beams Seq 201",
+    "fabricationStart": "2026-03-18",
+    "fabricationCompletion": "2026-03-20",
+    "erectionStart": { "date": "2026-03-19" },
+    "erectionCompletion": { "date": "2026-03-20" }
+  },
+  {
+    "member": "Misc Seq 201",
+    "fabricationStart": "2026-03-18",
+    "fabricationCompletion": "2026-03-20",
+    "erectionStart": { "date": "2026-03-21" },
+    "erectionCompletion": { "date": "2026-03-20" }
+  },
+  {
+    "member": "Columns Seq 202",
+    "fabricationStart": "2026-03-21",
+    "fabricationCompletion": "2026-03-23",
+    "erectionStart": { "date": "2026-03-21" },
+    "erectionCompletion": { "date": "2026-03-21" }
+  },
+  {
+    "member": "Beams Seq 202",
+    "fabricationStart": "2026-03-21",
+    "fabricationCompletion": "2026-03-23",
+    "erectionStart": { "date": "2026-03-22" },
+    "erectionCompletion": { "date": "2026-03-23" }
+  },
+  {
+    "member": "Misc Seq 202",
+    "fabricationStart": "2026-03-21",
+    "fabricationCompletion": "2026-03-23",
+    "erectionStart": { "date": "2026-03-24" },
+    "erectionCompletion": { "date": "2026-03-23" }
+  },
+  {
+    "member": "Columns Seq 203",
+    "fabricationStart": "2026-03-24",
+    "fabricationCompletion": "2026-03-26",
+    "erectionStart": { "date": "2026-03-24" },
+    "erectionCompletion": { "date": "2026-03-24" }
+  },
+  {
+    "member": "Beams Seq 203",
+    "fabricationStart": "2026-03-24",
+    "fabricationCompletion": "2026-03-26",
+    "erectionStart": { "date": "2026-03-25" },
+    "erectionCompletion": { "date": "2026-03-26" }
+  },
+  {
+    "member": "Misc Seq 203",
+    "fabricationStart": "2026-03-24",
+    "fabricationCompletion": "2026-03-26",
+    "erectionStart": { "date": "2026-03-27" },
+    "erectionCompletion": { "date": "2026-03-26" }
+  },
+  {
+    "member": "Columns Seq 204",
+    "fabricationStart": "2026-03-27",
+    "fabricationCompletion": "2026-03-29",
+    "erectionStart": { "date": "2026-03-27" },
+    "erectionCompletion": { "date": "2026-03-27" }
+  },
+  {
+    "member": "Beams Seq 204",
+    "fabricationStart": "2026-03-27",
+    "fabricationCompletion": "2026-03-29",
+    "erectionStart": { "date": "2026-03-28" },
+    "erectionCompletion": { "date": "2026-03-29" }
+  },
+  {
+    "member": "Misc Seq 204",
+    "fabricationStart": "2026-03-27",
+    "fabricationCompletion": "2026-03-29",
+    "erectionStart": { "date": "2026-03-30" },
+    "erectionCompletion": { "date": "2026-03-29" }
+  },
+  {
+    "member": "Columns Seq 205",
+    "fabricationStart": "2026-03-30",
+    "fabricationCompletion": "2026-03-31",
+    "erectionStart": { "date": "2026-03-30" },
+    "erectionCompletion": { "date": "2026-03-30" }
+  },
+  {
+    "member": "Beams Seq 205",
+    "fabricationStart": "2026-03-30",
+    "fabricationCompletion": "2026-03-31",
+    "erectionStart": { "date": "2026-03-31" },
+    "erectionCompletion": { "date": "2026-03-31" }
+  },
+  {
+    "member": "Misc Seq 205",
+    "fabricationStart": "2026-03-30",
+    "fabricationCompletion": "2026-03-31",
+    "erectionStart": { "date": "2026-04-01" },
+    "erectionCompletion": { "date": "2026-03-31" }
+  },
+  {
+    "member": "Columns Seq 206",
+    "fabricationStart": "2026-04-01",
+    "fabricationCompletion": "2026-04-02",
+    "erectionStart": { "date": "2026-04-01" },
+    "erectionCompletion": { "date": "2026-04-01" }
+  },
+  {
+    "member": "Beams Seq 206",
+    "fabricationStart": "2026-04-01",
+    "fabricationCompletion": "2026-04-02",
+    "erectionStart": { "date": "2026-04-02" },
+    "erectionCompletion": { "date": "2026-04-02" }
+  },
+  {
+    "member": "Misc Seq 206",
+    "fabricationStart": "2026-04-01",
+    "fabricationCompletion": "2026-04-02",
+    "erectionStart": { "date": "2026-04-03" },
+    "erectionCompletion": { "date": "2026-04-02" }
+  },
+  {
+    "member": "Columns Seq 106",
+    "fabricationStart": "2026-04-03",
+    "fabricationCompletion": "2026-04-04",
+    "erectionStart": { "date": "2026-04-03" },
+    "erectionCompletion": { "date": "2026-04-03" }
+  },
+  {
+    "member": "Beams Seq 106",
+    "fabricationStart": "2026-04-03",
+    "fabricationCompletion": "2026-04-04",
+    "erectionStart": { "date": "2026-04-04" },
+    "erectionCompletion": { "date": "2026-04-04" }
+  },
+  {
+    "member": "Misc Seq 106",
+    "fabricationStart": "2026-04-03",
+    "fabricationCompletion": "2026-04-04",
+    "erectionStart": { "date": "2026-04-05" },
+    "erectionCompletion": { "date": "2026-04-04" }
+  },
+  {
+    "member": "Columns Seq 105",
+    "fabricationStart": "2026-04-05",
+    "fabricationCompletion": "2026-04-06",
+    "erectionStart": { "date": "2026-04-05" },
+    "erectionCompletion": { "date": "2026-04-05" }
+  },
+  {
+    "member": "Beams Seq 105",
+    "fabricationStart": "2026-04-05",
+    "fabricationCompletion": "2026-04-06",
+    "erectionStart": { "date": "2026-04-06" },
+    "erectionCompletion": { "date": "2026-04-06" }
+  },
+  {
+    "member": "Misc Seq 105",
+    "fabricationStart": "2026-04-05",
+    "fabricationCompletion": "2026-04-06",
+    "erectionStart": { "date": "2026-04-07" },
+    "erectionCompletion": { "date": "2026-04-06" }
+  },
+  {
+    "member": "Columns Seq 104",
+    "fabricationStart": "2026-04-07",
+    "fabricationCompletion": "2026-04-08",
+    "erectionStart": { "date": "2026-04-07" },
+    "erectionCompletion": { "date": "2026-04-07" }
+  },
+  {
+    "member": "Beams Seq 104",
+    "fabricationStart": "2026-04-07",
+    "fabricationCompletion": "2026-04-08",
+    "erectionStart": { "date": "2026-04-08" },
+    "erectionCompletion": { "date": "2026-04-08" }
+  },
+  {
+    "member": "Misc Seq 104",
+    "fabricationStart": "2026-04-07",
+    "fabricationCompletion": "2026-04-08",
+    "erectionStart": { "date": "2026-04-09" },
+    "erectionCompletion": { "date": "2026-04-08" }
+  },
+  {
+    "member": "Columns Seq 103",
+    "fabricationStart": "2026-04-09",
+    "fabricationCompletion": "2026-04-10",
+    "erectionStart": { "date": "2026-04-09" },
+    "erectionCompletion": { "date": "2026-04-09" }
+  },
+  {
+    "member": "Beams Seq 103",
+    "fabricationStart": "2026-04-09",
+    "fabricationCompletion": "2026-04-10",
+    "erectionStart": { "date": "2026-04-10" },
+    "erectionCompletion": { "date": "2026-04-10" }
+  },
+  {
+    "member": "Misc Seq 103",
+    "fabricationStart": "2026-04-09",
+    "fabricationCompletion": "2026-04-10",
+    "erectionStart": { "date": "2026-04-11" },
+    "erectionCompletion": { "date": "2026-04-10" }
+  },
+  {
+    "member": "Columns Seq 102",
+    "fabricationStart": "2026-04-11",
+    "fabricationCompletion": "2026-04-12",
+    "erectionStart": { "date": "2026-04-11" },
+    "erectionCompletion": { "date": "2026-04-11" }
+  },
+  {
+    "member": "Beams Seq 102",
+    "fabricationStart": "2026-04-11",
+    "fabricationCompletion": "2026-04-12",
+    "erectionStart": { "date": "2026-04-12" },
+    "erectionCompletion": { "date": "2026-04-12" }
+  },
+  {
+    "member": "Misc Seq 102",
+    "fabricationStart": "2026-04-11",
+    "fabricationCompletion": "2026-04-12",
+    "erectionStart": { "date": "2026-04-13" },
+    "erectionCompletion": { "date": "2026-04-12" }
+  }
+]

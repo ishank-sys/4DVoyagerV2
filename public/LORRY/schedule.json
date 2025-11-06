@@ -1,23 +1,156 @@
 [
   {
-    "member": "Anchor Bolts",
-    "fabricationStart": "2025-10-24",
-    "fabricationCompletion": "2025-10-31",
-    "erectionStart": { "date": "2025-11-01" },
-    "erectionCompletion": { "date": "2025-11-03" }
+    "member": "Anchor Bolts & Embeds",
+    "fabricationStart": "2027-01-18",
+    "fabricationCompletion": "2027-01-24",
+    "erectionStart": { "date": "2025-03-15" },
+    "erectionCompletion": { "date": "2025-03-22" }
   },
   {
-    "member": "Columns Level 1",
-    "fabricationStart": { "label": "Fab D1", "date": "2025-11-04" },
-    "fabricationCompletion": { "date": "2025-11-07" },
-    "erectionStart": { "file": "BSGS 03 3D-Model-7_2025-11-08.ifc" },
-    "erectionCompletion": { "file": "BSGS 03 3D-Model-7_2025-11-10.ifc", "label": "EC L1" }
+    "member": "Columns",
+    "fabricationStart": "2027-01-25",
+    "fabricationCompletion": "2027-01-26",
+    "erectionStart": { "date": "2025-03-22" },
+    "erectionCompletion": { "date": "2025-03-23" }
   },
   {
-    "member": "Beams (Area A)",
-    "fabricationStart": { "index": 20, "label": "Start (idx 20)" },
-    "fabricationCompletion": { "index": 25 },
-    "erectionStart": "2025-12-01",
-    "erectionCompletion": "2025-12-05"
+    "member": "Beams",
+    "fabricationStart": "2027-01-27",
+    "fabricationCompletion": "2027-01-28",
+    "erectionStart": { "date": "2025-03-24" },
+    "erectionCompletion": { "date": "2025-03-27" }
+  },
+  {
+    "member": "Misc",
+    "fabricationStart": "2027-01-29",
+    "fabricationCompletion": "2027-01-29",
+    "erectionStart": { "date": "2025-03-28" },
+    "erectionCompletion": { "date": "2025-03-28" }
+  },
+  {
+    "member": "Columns",
+    "fabricationStart": "2027-01-30",
+    "fabricationCompletion": "2027-02-02",
+    "erectionStart": { "date": "2025-03-29" },
+    "erectionCompletion": { "date": "2025-04-04" }
+  },
+  {
+    "member": "Beams",
+    "fabricationStart": "2027-02-03",
+    "fabricationCompletion": "2027-02-07",
+    "erectionStart": { "date": "2025-04-04" },
+    "erectionCompletion": { "date": "2025-04-12" }
+  },
+  {
+    "member": "Misc",
+    "fabricationStart": "2027-02-08",
+    "fabricationCompletion": "2027-02-09",
+    "erectionStart": { "date": "2025-04-12" },
+    "erectionCompletion": { "date": "2025-04-14" }
+  },
+  {
+    "member": "Columns",
+    "fabricationStart": "2027-02-10",
+    "fabricationCompletion": "2027-02-11",
+    "erectionStart": { "date": "2025-04-15" },
+    "erectionCompletion": { "date": "2025-04-21" }
+  },
+  {
+    "member": "Beams",
+    "fabricationStart": "2027-02-12",
+    "fabricationCompletion": "2027-02-13",
+    "erectionStart": { "date": "2025-04-21" },
+    "erectionCompletion": { "date": "2025-04-29" }
+  },
+  {
+    "member": "Misc",
+    "fabricationStart": "2027-02-14",
+    "fabricationCompletion": "2027-02-14",
+    "erectionStart": { "date": "2025-04-29" },
+    "erectionCompletion": { "date": "2025-05-01" }
+  },
+  {
+    "member": "Columns",
+    "fabricationStart": "2027-02-15",
+    "fabricationCompletion": "2027-02-16",
+    "erectionStart": { "date": "2025-05-02" },
+    "erectionCompletion": { "date": "2025-05-08" }
+  },
+  {
+    "member": "Beams",
+    "fabricationStart": "2027-02-17",
+    "fabricationCompletion": "2027-02-18",
+    "erectionStart": { "date": "2025-05-08" },
+    "erectionCompletion": { "date": "2025-05-16" }
+  },
+  {
+    "member": "Misc",
+    "fabricationStart": "2027-02-19",
+    "fabricationCompletion": "2027-02-19",
+    "erectionStart": { "date": "2025-05-16" },
+    "erectionCompletion": { "date": "2025-05-18" }
+  },
+  {
+    "member": "Columns",
+    "fabricationStart": "2027-02-20",
+    "fabricationCompletion": "2027-02-20",
+    "erectionStart": { "date": "2025-05-19" },
+    "erectionCompletion": { "date": "2025-05-19" }
+  },
+  {
+    "member": "Beams",
+    "fabricationStart": "2027-02-21",
+    "fabricationCompletion": "2027-02-21",
+    "erectionStart": { "date": "2025-05-20" },
+    "erectionCompletion": { "date": "2025-05-21" }
+  },
+  {
+    "member": "Misc",
+    "fabricationStart": "2027-02-22",
+    "fabricationCompletion": "2027-02-22",
+    "erectionStart": { "date": "2025-05-22" },
+    "erectionCompletion": { "date": "2025-05-22" }
+  },
+  {
+    "member": "Columns",
+    "fabricationStart": "2027-02-23",
+    "fabricationCompletion": "2027-02-25",
+    "erectionStart": { "date": "2025-05-23" },
+    "erectionCompletion": { "date": "2025-05-26" }
+  },
+  {
+    "member": "Beams",
+    "fabricationStart": "2027-02-26",
+    "fabricationCompletion": "2027-03-02",
+    "erectionStart": { "date": "2025-05-27" },
+    "erectionCompletion": { "date": "2025-06-02" }
+  },
+  {
+    "member": "Misc",
+    "fabricationStart": "2027-03-03",
+    "fabricationCompletion": "2027-03-03",
+    "erectionStart": { "date": "2025-06-03" },
+    "erectionCompletion": { "date": "2025-06-04" }
+  },
+  {
+    "member": "Columns",
+    "fabricationStart": "2027-03-04",
+    "fabricationCompletion": "2027-03-06",
+    "erectionStart": { "date": "2025-06-05" },
+    "erectionCompletion": { "date": "2025-06-09" }
+  },
+  {
+    "member": "Beams",
+    "fabricationStart": "2027-03-07",
+    "fabricationCompletion": "2027-03-10",
+    "erectionStart": { "date": "2025-06-10" },
+    "erectionCompletion": { "date": "2025-06-16" }
+  },
+  {
+    "member": "Misc",
+    "fabricationStart": "2027-03-11",
+    "fabricationCompletion": "2027-03-12",
+    "erectionStart": { "date": "2025-06-17" },
+    "erectionCompletion": { "date": "2025-06-18" }
   }
 ]
