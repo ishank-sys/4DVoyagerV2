@@ -1,51 +1,135 @@
 [
   {
-    "member": "Anchor Bolts",
-    "fabricationStart": { "file": "BSGS 03 3D-Model-1024-1.ifc", "label": "Fab Start" },
-    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1027-4.ifc" },
-    "erectionStart": { "file": "BSGS 03 3D-Model-1104-8.ifc" },
-    "erectionCompletion": { "file": "BSGS 03 3D-Model-1106-9.ifc", "label": "Erect Done" }
+    "member": "Embeds",
+    "fabricationStart": { "file": "BSGS 03 3D-Model-1027-4.ifc", "date": "2025-10-31" },
+    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1027-4.ifc", "date": "2025-11-01" },
+    "erectionStart": { "file": "BSGS 03 3D-Model-1027-4.ifc", "date": "2025-11-02" },
+    "erectionCompletion": { "file": "BSGS 03 3D-Model-1027-4.ifc", "date": "2025-11-03" }
   },
   {
-    "member": "Columns Level 1",
-    "fabricationStart": { "file": "BSGS 03 3D-Model-1108-10.ifc", "label": "Fab D1" },
-    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1110-11.ifc" },
-    "erectionStart": { "file": "BSGS 03 3D-Model-1114-13.ifc" },
-    "erectionCompletion": { "file": "BSGS 03 3D-Model-1118-15.ifc", "label": "EC L1" }
+    "member": "Beams",
+    "fabricationStart": { "file": "BSGS 03 3D-Model-1104-8.ifc", "date": "2025-11-04" },
+    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1106-9.ifc", "date": "2025-11-07" },
+    "erectionStart": { "file": "BSGS 03 3D-Model-1106-9.ifc", "date": "2025-11-06" },
+    "erectionCompletion": { "file": "BSGS 03 3D-Model-1108-10.ifc", "date": "2025-11-09" }
   },
   {
-    "member": "Braces – Area A",
-    "fabricationStart": { "file": "BSGS 03 3D-Model-1120-16.ifc" },
-    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1122-17.ifc" },
-    "erectionStart": { "file": "BSGS 03 3D-Model-1126-19.ifc" },
-    "erectionCompletion": { "file": "BSGS 03 3D-Model-1128-20.ifc" }
+    "member": "Posts",
+    "fabricationStart": { "file": "BSGS 03 3D-Model-1106-9.ifc", "date": "2025-11-06" },
+    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1108-10.ifc", "date": "2025-11-08" },
+    "erectionStart": { "file": "BSGS 03 3D-Model-1108-10.ifc", "date": "2025-11-09" },
+    "erectionCompletion": { "file": "BSGS 03 3D-Model-1110-11.ifc", "date": "2025-11-10" }
   },
   {
-    "member": "Beams – Level 1",
-    "fabricationStart": { "file": "BSGS 03 3D-Model-1130-21.ifc" },
-    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1202-22.ifc" },
-    "erectionStart": { "file": "BSGS 03 3D-Model-1204-23.ifc" },
-    "erectionCompletion": { "file": "BSGS 03 3D-Model-1206-24.ifc" }
+    "member": "Stairs",
+    "fabricationStart": { "file": "BSGS 03 3D-Model-1106-9.ifc", "date": "2025-11-07" },
+    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1108-10.ifc", "date": "2025-11-08" },
+    "erectionStart": { "file": "BSGS 03 3D-Model-1110-11.ifc", "date": "2025-11-12" },
+    "erectionCompletion": { "file": "BSGS 03 3D-Model-1114-13.ifc", "date": "2025-11-14" }
   },
   {
-    "member": "Beams – Level 2",
-    "fabricationStart": { "file": "BSGS 03 3D-Model-1208-25.ifc" },
-    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1210-26.ifc" },
-    "erectionStart": { "file": "BSGS 03 3D-Model-1212-27.ifc" },
-    "erectionCompletion": { "file": "BSGS 03 3D-Model-1215-28.ifc" }
+    "member": "Embeds",
+    "fabricationStart": { "file": "BSGS 03 3D-Model-1114-13.ifc", "date": "2025-11-15" },
+    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1114-13.ifc", "date": "2025-11-16" },
+    "erectionStart": { "file": "BSGS 03 3D-Model-1118-15.ifc", "date": "2025-11-18" },
+    "erectionCompletion": { "file": "BSGS 03 3D-Model-1118-15.ifc", "date": "2025-11-18" }
   },
   {
-    "member": "Misc Items",
-    "fabricationStart": { "file": "BSGS 03 3D-Model-1216-29.ifc" },
-    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1218-30.ifc" },
-    "erectionStart": { "file": "BSGS 03 3D-Model-1220-31.ifc" },
-    "erectionCompletion": { "file": "BSGS 03 3D-Model-1222-32.ifc" }
+    "member": "Beams",
+    "fabricationStart": { "file": "BSGS 03 3D-Model-1114-13.ifc", "date": "2025-11-17" },
+    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1118-15.ifc", "date": "2025-11-19" },
+    "erectionStart": { "file": "BSGS 03 3D-Model-1120-16.ifc", "date": "2025-11-20" },
+    "erectionCompletion": { "file": "BSGS 03 3D-Model-1122-17.ifc", "date": "2025-11-23" }
   },
   {
-    "member": "Roof Frames",
-    "fabricationStart": { "file": "BSGS 03 3D-Model-1224-33.ifc" },
-    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1226-34.ifc" },
-    "erectionStart": { "file": "BSGS 03 3D-Model-1228-35.ifc" },
-    "erectionCompletion": { "file": "BSGS 03 3D-Model-1230-36.ifc" }
+    "member": "Posts",
+    "fabricationStart": { "file": "BSGS 03 3D-Model-1120-16.ifc", "date": "2025-11-21" },
+    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1122-17.ifc", "date": "2025-11-24" },
+    "erectionStart": { "file": "BSGS 03 3D-Model-1122-17.ifc", "date": "2025-11-23" },
+    "erectionCompletion": { "file": "BSGS 03 3D-Model-1122-17.ifc", "date": "2025-11-25" }
+  },
+  {
+    "member": "Turnbuckles",
+    "fabricationStart": { "file": "BSGS 03 3D-Model-1122-17.ifc", "date": "2025-11-23" },
+    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1122-17.ifc", "date": "2025-11-24" },
+    "erectionStart": { "file": "BSGS 03 3D-Model-1122-17.ifc", "date": "2025-11-25" },
+    "erectionCompletion": { "file": "BSGS 03 3D-Model-1122-17.ifc", "date": "2025-11-25" }
+  },
+  {
+    "member": "Purlins",
+    "fabricationStart": { "file": "BSGS 03 3D-Model-1122-17.ifc", "date": "2025-11-23" },
+    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1122-17.ifc", "date": "2025-11-24" },
+    "erectionStart": { "file": "BSGS 03 3D-Model-1126-19.ifc", "date": "2025-11-26" },
+    "erectionCompletion": { "file": "BSGS 03 3D-Model-1128-20.ifc", "date": "2025-11-28" }
+  },
+  {
+    "member": "Embeds",
+    "fabricationStart": { "file": "BSGS 03 3D-Model-1130-21.ifc", "date": "2025-11-30" },
+    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1130-21.ifc", "date": "2025-11-30" },
+    "erectionStart": { "file": "BSGS 03 3D-Model-1130-21.ifc", "date": "2025-12-01" },
+    "erectionCompletion": { "file": "BSGS 03 3D-Model-1130-21.ifc", "date": "2025-12-01" }
+  },
+  {
+    "member": "Beams",
+    "fabricationStart": { "file": "BSGS 03 3D-Model-1130-21.ifc", "date": "2025-11-30" },
+    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1202-22.ifc", "date": "2025-12-02" },
+    "erectionStart": { "file": "BSGS 03 3D-Model-1202-22.ifc", "date": "2025-12-03" },
+    "erectionCompletion": { "file": "BSGS 03 3D-Model-1204-23.ifc", "date": "2025-12-05" }
+  },
+  {
+    "member": "Posts",
+    "fabricationStart": { "file": "BSGS 03 3D-Model-1202-22.ifc", "date": "2025-12-03" },
+    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1204-23.ifc", "date": "2025-12-05" },
+    "erectionStart": { "file": "BSGS 03 3D-Model-1204-23.ifc", "date": "2025-12-05" },
+    "erectionCompletion": { "file": "BSGS 03 3D-Model-1206-24.ifc", "date": "2025-12-07" }
+  },
+  {
+    "member": "Purlins",
+    "fabricationStart": { "file": "BSGS 03 3D-Model-1206-24.ifc", "date": "2025-12-07" },
+    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1208-25.ifc", "date": "2025-12-09" },
+    "erectionStart": { "file": "BSGS 03 3D-Model-1208-25.ifc", "date": "2025-12-09" },
+    "erectionCompletion": { "file": "BSGS 03 3D-Model-1210-26.ifc", "date": "2025-12-11" }
+  },
+  {
+    "member": "Embeds",
+    "fabricationStart": { "file": "BSGS 03 3D-Model-1215-28.ifc", "date": "2025-12-15" },
+    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1216-29.ifc", "date": "2025-12-16" },
+    "erectionStart": { "file": "BSGS 03 3D-Model-1216-29.ifc", "date": "2025-12-17" },
+    "erectionCompletion": { "file": "BSGS 03 3D-Model-1218-30.ifc", "date": "2025-12-18" }
+  },
+  {
+    "member": "Turnbuckles",
+    "fabricationStart": { "file": "BSGS 03 3D-Model-1215-28.ifc", "date": "2025-12-15" },
+    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1216-29.ifc", "date": "2025-12-16" },
+    "erectionStart": { "file": "BSGS 03 3D-Model-1216-29.ifc", "date": "2025-12-17" },
+    "erectionCompletion": { "file": "BSGS 03 3D-Model-1218-30.ifc", "date": "2025-12-18" }
+  },
+  {
+    "member": "Beams",
+    "fabricationStart": { "file": "BSGS 03 3D-Model-1215-28.ifc", "date": "2025-12-15" },
+    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1216-29.ifc", "date": "2025-12-17" },
+    "erectionStart": { "file": "BSGS 03 3D-Model-1216-29.ifc", "date": "2025-12-17" },
+    "erectionCompletion": { "file": "BSGS 03 3D-Model-1218-30.ifc", "date": "2025-12-19" }
+  },
+  {
+    "member": "Turnbuckles",
+    "fabricationStart": { "file": "BSGS 03 3D-Model-1216-29.ifc", "date": "2025-12-17" },
+    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1218-30.ifc", "date": "2025-12-18" },
+    "erectionStart": { "file": "BSGS 03 3D-Model-1218-30.ifc", "date": "2025-12-19" },
+    "erectionCompletion": { "file": "BSGS 03 3D-Model-1220-31.ifc", "date": "2025-12-20" }
+  },
+  {
+    "member": "Posts",
+    "fabricationStart": { "file": "BSGS 03 3D-Model-1220-31.ifc", "date": "2025-12-20" },
+    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1222-32.ifc", "date": "2025-12-22" },
+    "erectionStart": { "file": "BSGS 03 3D-Model-1224-33.ifc", "date": "2025-12-24" },
+    "erectionCompletion": { "file": "BSGS 03 3D-Model-1224-33.ifc", "date": "2025-12-24" }
+  },
+  {
+    "member": "Purlins",
+    "fabricationStart": { "file": "BSGS 03 3D-Model-1224-33.ifc", "date": "2025-12-24" },
+    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1226-34.ifc", "date": "2025-12-26" },
+    "erectionStart": { "file": "BSGS 03 3D-Model-1228-35.ifc", "date": "2025-12-28" },
+    "erectionCompletion": { "file": "BSGS 03 3D-Model-1230-36.ifc", "date": "2025-12-30" }
   }
 ]

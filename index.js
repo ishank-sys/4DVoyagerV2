@@ -6,20 +6,21 @@ const viewer = new IfcViewerAPI({ container });
 viewer.IFC.setWasmPath("./");
 
 // Safe background
-function setViewerBackground(color = "#0b0f1e", retries = 30) {
+function setViewerBackground(color = "#25d016ff", retries = 30) {
   try {
     const renderer = viewer.context.getRenderer?.() || viewer.context.renderer;
     if (renderer && viewer.context.scene) {
       renderer.setClearColor(new THREE.Color(color), 1);
+    
       viewer.context.scene.background = new THREE.Color(color);
     } else if (retries > 0) {
       setTimeout(() => setViewerBackground(color, retries - 1), 100);
     }
-  } catch {}
+  } catch { console.warn('setViewerBackground failed'); }
 }
-setTimeout(() => setViewerBackground("#0b0f1e"), 300);
+setTimeout(() => setViewerBackground("#ffffffff"), 300);
 // Improve contrast so models retain brightness when overlay darkens background
-function configureRendererLook(retries = 30) {
+function configureRendererLook(retries = 90) {
   try {
     const renderer = viewer.context.getRenderer?.() || viewer.context.renderer;
     if (renderer) {
@@ -30,8 +31,14 @@ function configureRendererLook(retries = 30) {
         // Fallback for older three versions
         renderer.outputEncoding = THREE.sRGBEncoding;
       }
-      renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.25; // lift highlights slightly
+      // Ensure realistic light falloff; prefer modern flag when present
+      if ('useLegacyLights' in renderer) {
+        renderer.useLegacyLights = false;
+      } else if ('physicallyCorrectLights' in renderer) {
+        renderer.physicallyCorrectLights = true;
+      }
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.2; // high exposure to push greys toward white
     } else if (retries > 0) {
       setTimeout(() => configureRendererLook(retries - 1), 100);
     }
@@ -45,6 +52,7 @@ const slider = document.getElementById("model-slider");
 const autoplayButton = document.getElementById("autoplay-button");
 const rotateButton = document.getElementById("rotate-button");
 const orbitBaseOffsetInput = document.getElementById('orbit-base-offset');
+const brightnessSlider = document.getElementById('brightness-slider');
 const modelNameDisplay = document.getElementById("model-name-display");
 const loadingOverlay = document.getElementById("loading-overlay");
 const loadingText = document.getElementById("loading-text");
@@ -84,6 +92,8 @@ let tableRowsData = [
   ["Roof Frames","18/4/2025","22/4/2025","23/4/2025","26/4/2025"],
   ["Anchor Bolts 3","23/4/2025","27/4/2025","28/4/2025","1/5/2025"],
 ];
+
+
 
 function buildProgressTable() {
   progressTbody.innerHTML = "";
@@ -178,7 +188,7 @@ let orbitState = {
   lastTime: 0,
   speed: 0, // radians per ms
   loop: false,
-  // Single reusable pivot so rotation continues across model changes
+  // Legacy: single pivotRoot no longer used (we rotate all models via per-model pivots)
   pivotRoot: null,
   // Keep the current angle so swapping models doesn't reset
   currentAngle: 0,
@@ -186,37 +196,44 @@ let orbitState = {
   singleAcc: 0
 };
 
-function retargetPivotForModel(model, baseYOffset = 0) {
+// Ensure a per-model pivot exists, parent the model to it, and place pivot at model base center
+function ensurePivotForModel(model, baseYOffset = 0) {
   if (!model) return null;
   try {
     const box = new THREE.Box3().setFromObject(model);
-    const pivotPoint = new THREE.Vector3();
-    // Use the model's base (min.y) + user offset as pivot Y
-    box.getCenter(pivotPoint);
-    pivotPoint.y = box.min.y + baseYOffset;
+    const center = new THREE.Vector3();
+    box.getCenter(center);
+    center.y = box.min.y + baseYOffset;
 
-    if (!orbitState.pivotRoot) {
-      orbitState.pivotRoot = new THREE.Object3D();
-      orbitState.pivotRoot.name = 'orbit-pivot-root';
-      viewer.context.scene.add(orbitState.pivotRoot);
+    let pivot = model.userData._orbitPivot;
+    if (!pivot) {
+      pivot = new THREE.Object3D();
+      pivot.name = 'orbit-pivot';
+      viewer.context.scene.add(pivot);
+      model.userData._orbitPivot = pivot;
     }
-    const pivot = orbitState.pivotRoot;
-    pivot.position.copy(pivotPoint);
-    // Preserve current angle
+    pivot.position.copy(center);
+    // Preserve current world transform while reparenting
+    try { pivot.attach(model); }
+    catch (e) { model.position.sub(center); pivot.add(model); }
+    // Keep current angle when (re)creating pivots
     pivot.rotation.y = orbitState.currentAngle || 0;
-    try {
-      // attach preserves world transform
-      pivot.attach(model);
-    } catch (e) {
-      // fallback: approximate relative parenting
-      model.position.sub(pivotPoint);
-      pivot.add(model);
-    }
     return pivot;
   } catch (e) {
-    console.warn('Pivot retarget failed', e);
+    console.warn('ensurePivotForModel failed', e);
     return null;
   }
+}
+
+// Backwards-compatible helper: previously retargeted to a shared pivot; now ensures per-model pivot
+function retargetPivotForModel(model, baseYOffset = 0) {
+  return ensurePivotForModel(model, baseYOffset);
+}
+
+function prepareAllPivots(baseYOffset = 0) {
+  loadedModels.forEach((entry) => {
+    if (entry?.model) ensurePivotForModel(entry.model, baseYOffset);
+  });
 }
 
 function stopOrbit() {
@@ -229,15 +246,12 @@ function stopOrbit() {
 }
 
 function startOrbit(durationMs = 20000, loop = false) {
-  // start continuous or single rotation around computed pivot
+  // start continuous or single rotation; rotate ALL models via their own pivots
   stopOrbit();
-  const idx = parseInt(slider.value || 0);
-  const entry = loadedModels[idx];
-  if (!entry || !entry.model) return;
-  const model = entry.model;
+  if (!loadedModels.length) return;
   const baseYOffset = parseFloat(orbitBaseOffsetInput?.value || 0);
-  const pivot = retargetPivotForModel(model, baseYOffset);
-  // If retargeting fails, continue with direct model rotation as a fallback
+  prepareAllPivots(isNaN(baseYOffset) ? 0 : baseYOffset);
+  // Renderer for manual render flush
   const renderer = viewer.context.getRenderer?.() || viewer.context.renderer;
   orbitState.running = true;
   orbitState.lastTime = performance.now();
@@ -251,11 +265,16 @@ function startOrbit(durationMs = 20000, loop = false) {
     const delta = now - orbitState.lastTime;
     orbitState.lastTime = now;
     const angle = orbitState.speed * delta;
-    // rotate pivot (if present) otherwise rotate model
+    // Rotate per-model pivots (or the model directly if pivot missing)
     try {
       orbitState.currentAngle += angle;
-      if (pivot) pivot.rotation.y = orbitState.currentAngle;
-      else model.rotation.y = orbitState.currentAngle;
+      for (const entry of loadedModels) {
+        const mdl = entry?.model;
+        if (!mdl) continue;
+        const pv = mdl.userData?._orbitPivot;
+        if (pv) pv.rotation.y = orbitState.currentAngle;
+        else mdl.rotation.y = orbitState.currentAngle;
+      }
       if (renderer && viewer.context.scene && viewer.context.camera) {
         renderer.render(viewer.context.scene, viewer.context.camera);
       }
@@ -316,12 +335,8 @@ slider.addEventListener("change", () => stopAutoplay());
 // If the base offset changes while rotating, retarget pivot without resetting angle
 if (orbitBaseOffsetInput) {
   orbitBaseOffsetInput.addEventListener('change', () => {
-    if (orbitState.running && orbitState.loop) {
-      const idx = parseInt(slider.value || 0);
-      const model = loadedModels[idx]?.model;
-      const baseYOffset = parseFloat(orbitBaseOffsetInput.value || 0);
-      retargetPivotForModel(model, baseYOffset);
-    }
+    const baseYOffset = parseFloat(orbitBaseOffsetInput.value || 0);
+    prepareAllPivots(isNaN(baseYOffset) ? 0 : baseYOffset);
   });
 }
 
@@ -424,6 +439,13 @@ async function loadAllIfcs() {
         const model = await viewer.IFC.loadIfc(file, firstLoaded);
         firstLoaded = false;
         loadedModels.push({ model, name });
+        // If rotation is active, ensure new model also gets a pivot and current angle applied
+        if (orbitState.running) {
+          const baseYOffset = parseFloat(orbitBaseOffsetInput?.value || 0);
+          const pv = ensurePivotForModel(model, isNaN(baseYOffset) ? 0 : baseYOffset);
+          if (pv) pv.rotation.y = orbitState.currentAngle || 0;
+          else model.rotation.y = orbitState.currentAngle || 0;
+        }
         loadingText.textContent = `Loading models... ${Math.round(((i + 1) / total) * 100)}%`;
       } catch (e) {
         console.error('Failed to load IFC', name, e);
