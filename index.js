@@ -301,7 +301,13 @@ function advanceSlider() {
   // which may be a placeholder value before models finish loading.
   const maxVal = Math.max(0, (loadedModels?.length || 0) - 1);
   let nextVal = parseInt(slider.value) + 1;
-  if (nextVal > maxVal) nextVal = 0;
+  
+  // Stop autoplay when reaching the end instead of looping
+  if (nextVal > maxVal) {
+    stopAutoplay();
+    return;
+  }
+  
   slider.value = nextVal;
   updateModelVisibility(nextVal);
 }

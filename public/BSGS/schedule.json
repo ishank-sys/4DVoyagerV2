@@ -1,6 +1,13 @@
 [
   {
     "member": "Embeds",
+    "fabricationStart": { "file": "BSGS 03 3D-Model-1024-1.ifc", "date": "2025-10-25" },
+    "fabricationCompletion": { "file": "BSGS 03 3D-Model-1024-1.ifc", "date": "2025-10-25" },
+    "erectionStart": { "file": "BSGS 03 3D-Model-1027-4.ifc", "date": "2025-10-27" },
+    "erectionCompletion": { "file": "BSGS 03 3D-Model-1027-4.ifc", "date": "2025-10-30" }
+  },
+  {
+    "member": "Anchor Bolt",
     "fabricationStart": { "file": "BSGS 03 3D-Model-1027-4.ifc", "date": "2025-10-31" },
     "fabricationCompletion": { "file": "BSGS 03 3D-Model-1027-4.ifc", "date": "2025-11-01" },
     "erectionStart": { "file": "BSGS 03 3D-Model-1027-4.ifc", "date": "2025-11-02" },
@@ -28,7 +35,7 @@
     "erectionCompletion": { "file": "BSGS 03 3D-Model-1114-13.ifc", "date": "2025-11-14" }
   },
   {
-    "member": "Embeds",
+    "member": "Anchor Bolt",
     "fabricationStart": { "file": "BSGS 03 3D-Model-1114-13.ifc", "date": "2025-11-15" },
     "fabricationCompletion": { "file": "BSGS 03 3D-Model-1114-13.ifc", "date": "2025-11-16" },
     "erectionStart": { "file": "BSGS 03 3D-Model-1118-15.ifc", "date": "2025-11-18" },
@@ -63,7 +70,7 @@
     "erectionCompletion": { "file": "BSGS 03 3D-Model-1128-20.ifc", "date": "2025-11-28" }
   },
   {
-    "member": "Embeds",
+    "member": "Anchor Bolt",
     "fabricationStart": { "file": "BSGS 03 3D-Model-1130-21.ifc", "date": "2025-11-30" },
     "fabricationCompletion": { "file": "BSGS 03 3D-Model-1130-21.ifc", "date": "2025-11-30" },
     "erectionStart": { "file": "BSGS 03 3D-Model-1130-21.ifc", "date": "2025-12-01" },
@@ -91,7 +98,7 @@
     "erectionCompletion": { "file": "BSGS 03 3D-Model-1210-26.ifc", "date": "2025-12-11" }
   },
   {
-    "member": "Embeds",
+    "member": "Anchor Bolt",
     "fabricationStart": { "file": "BSGS 03 3D-Model-1215-28.ifc", "date": "2025-12-15" },
     "fabricationCompletion": { "file": "BSGS 03 3D-Model-1216-29.ifc", "date": "2025-12-16" },
     "erectionStart": { "file": "BSGS 03 3D-Model-1216-29.ifc", "date": "2025-12-17" },
