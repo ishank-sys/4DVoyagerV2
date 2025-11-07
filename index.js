@@ -51,6 +51,8 @@ viewer.axes.setAxes();
 const slider = document.getElementById("model-slider");
 const autoplayButton = document.getElementById("autoplay-button");
 const rotateButton = document.getElementById("rotate-button");
+const prevButton = document.getElementById("prev-button");
+const nextButton = document.getElementById("next-button");
 const orbitBaseOffsetInput = document.getElementById('orbit-base-offset');
 const brightnessSlider = document.getElementById('brightness-slider');
 const modelNameDisplay = document.getElementById("model-name-display");
@@ -326,6 +328,31 @@ if (rotateButton) {
       startOrbit(DEFAULT_ORBIT_DURATION, true);
       rotateButton.textContent = "⏹";
     }
+  });
+}
+
+// Next and previous buttons for manual navigation
+if (nextButton) {
+  nextButton.addEventListener("click", () => {
+    if ((loadedModels?.length || 0) <= 1) return; // nothing to iterate
+    stopAutoplay(); // stop autoplay when manually navigating
+    const maxVal = Math.max(0, (loadedModels?.length || 0) - 1);
+    let nextVal = parseInt(slider.value) + 1;
+    if (nextVal > maxVal) nextVal = 0; // wrap to beginning
+    slider.value = nextVal;
+    updateModelVisibility(nextVal);
+  });
+}
+
+if (prevButton) {
+  prevButton.addEventListener("click", () => {
+    if ((loadedModels?.length || 0) <= 1) return; // nothing to iterate
+    stopAutoplay(); // stop autoplay when manually navigating
+    const maxVal = Math.max(0, (loadedModels?.length || 0) - 1);
+    let prevVal = parseInt(slider.value) - 1;
+    if (prevVal < 0) prevVal = maxVal; // wrap to end
+    slider.value = prevVal;
+    updateModelVisibility(prevVal);
   });
 }
 
