@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>4D Voyager IFC Viewer</title>
+  <title>4D Voyager GLB Viewer</title>
   <style>
     :root {
-      --bg: #f5f6f8;
+      --bg: #ffffff;
       --bg-panel: rgba(255, 255, 255, 0.75);
       --text: #1e293b;
       --text-muted: #475569;
@@ -22,7 +22,7 @@
       --text-muted: #94a3b8;
       --border: rgba(255, 255, 255, 0.08);
       --highlight: #60a5fa;
-      --overlay: rgba(0, 0, 0, 0.45); /* Medium IFC overlay */
+      --overlay: rgba(0, 0, 0, 0); /* Medium GLB overlay */
     }
 
     *{margin:0;padding:0;box-sizing:border-box;}
@@ -81,14 +81,13 @@
       transition:filter 0.4s ease;
     }
 
-    /* IFC overlay */
+    /* GLB overlay */
     #viewer-overlay {
       position:absolute;
       inset:0;
       pointer-events:none;
-      background: rgba(0, 0, 0, 0.22); /* default for light mode */
-      /* Use multiply blending so midtones darken while highlights remain punchy */
-      mix-blend-mode: multiply;
+      /* Default to transparent overlay; theme script will adjust for light mode if desired */
+      background: rgba(0, 0, 0, 0.0);
       transition: background 0.5s ease;
       z-index:2;
     }
@@ -203,7 +202,7 @@
       transition:background 0.3s ease,color 0.3s ease;
     }
     [data-theme="dark"] #loading-overlay{
-      background:rgba(15,23,42,0.85);
+      background:rgba(15,23,42,1);
     }
     #loading-overlay.visible{visibility:visible;pointer-events:auto;}
     .spinner{
@@ -274,7 +273,7 @@
     <div id="loading-text">Loading models... 0%</div>
   </div>
 
-  <!-- IFC LOADER -->
+  <!-- GLB LOADER -->
   <script type="module" src="./index.js"></script>
 
   <script>
@@ -285,10 +284,10 @@
     toggleBtn.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
 
     function updateOverlayTheme(theme) {
-      // With mix-blend-mode:multiply, slightly higher alphas look better while keeping highlights bright
+      // Do not darken in dark mode to preserve model brightness
       overlay.style.background = theme === 'dark'
-        ? 'rgba(0, 0, 0, 0.55)'
-        : 'rgba(0, 0, 0, 0.25)';
+        ? 'rgba(0, 0, 0, 0.0)'
+        : 'rgba(0, 0, 0, 0.1)';
     }
 
     // Run once on page load

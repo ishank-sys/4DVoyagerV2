@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>4D BIM Visualization | Able Steel – TSMC Project</title>
+  <title>4D GLB Visualization | Able Steel – TSMC Project</title>
   <style>
     :root {
       --bg: #f9fafc;
@@ -106,22 +106,24 @@
       transition: color 0.3s ease, background 0.3s ease;
     }
 
-    h1 {
-      font-size: clamp(22px, 3.5vw, 36px);
+        h1 {
+      font-size: clamp(24px, 3.5vw, 38px);
       font-weight: 700;
       color: var(--text);
     }
 
     .subtitle {
-      margin-top: 8px;
+      margin-top: 10px;
       color: var(--text-muted);
+      font-size: 15px;
     }
 
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 28px;
-      margin-top: 36px;
+      gap: 32px;
+      margin-top: 50px;
+      justify-items: center;
     }
 
     .card {
@@ -212,9 +214,8 @@
   </header>
 
   <main>
-    <h1>4D BIM Visualization | Able Steel – TSMC Project</h1>
-    <div class="subtitle">Select a project to launch the interactive 4D Viewer.</div>
-
+    <h1>4D GLB Visualization | Able Steel – TSMC Project</h1>
+    <div class="subtitle">Select a project to launch the interactive 4D GLB Viewer.</div>
     <section class="grid">
       <a class="card" href="viewer.html?project=BSGS">
         <div class="preview">

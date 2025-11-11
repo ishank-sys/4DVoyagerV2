@@ -1,53 +1,75 @@
-import { IfcViewerAPI } from 'web-ifc-viewer';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
+// Initialize Three.js scene
 const container = document.getElementById('viewer-container');
-const viewer = new IfcViewerAPI({ container });
-viewer.IFC.setWasmPath("./");
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 
-// Safe background
-function setViewerBackground(color = "#25d016ff", retries = 30) {
-  try {
-    const renderer = viewer.context.getRenderer?.() || viewer.context.renderer;
-    if (renderer && viewer.context.scene) {
-      renderer.setClearColor(new THREE.Color(color), 1);
-    
-      viewer.context.scene.background = new THREE.Color(color);
-    } else if (retries > 0) {
-      setTimeout(() => setViewerBackground(color, retries - 1), 100);
-    }
-  } catch { console.warn('setViewerBackground failed'); }
-}
-setTimeout(() => setViewerBackground("#ffffffff"), 300);
-// Improve contrast so models retain brightness when overlay darkens background
-function configureRendererLook(retries = 90) {
-  try {
-    const renderer = viewer.context.getRenderer?.() || viewer.context.renderer;
-    if (renderer) {
-      // Prefer modern color space API when available
-      if ('outputColorSpace' in renderer) {
-        renderer.outputColorSpace = THREE.SRGBColorSpace;
-      } else if ('outputEncoding' in renderer) {
-        // Fallback for older three versions
-        renderer.outputEncoding = THREE.sRGBEncoding;
-      }
-      // Ensure realistic light falloff; prefer modern flag when present
-      if ('useLegacyLights' in renderer) {
-        renderer.useLegacyLights = false;
-      } else if ('physicallyCorrectLights' in renderer) {
-        renderer.physicallyCorrectLights = true;
-      }
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.2; // high exposure to push greys toward white
-    } else if (retries > 0) {
-      setTimeout(() => configureRendererLook(retries - 1), 100);
-    }
-  } catch {}
-}
-setTimeout(configureRendererLook, 350);
-viewer.grid.setGrid();
-viewer.axes.setAxes();
+// Setup renderer
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+container.appendChild(renderer.domElement);
 
+// Setup camera controls
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.screenSpacePanning = false;
+controls.minDistance = 1;
+controls.maxDistance = 100;
+
+// Setup lighting
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+scene.add(ambientLight);
+
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight.position.set(10, 10, 5);
+directionalLight.castShadow = true;
+directionalLight.shadow.mapSize.width = 2048;
+directionalLight.shadow.mapSize.height = 2048;
+directionalLight.shadow.camera.near = 0.5;
+directionalLight.shadow.camera.far = 50;
+scene.add(directionalLight);
+
+// Setup GLTF loader with DRACO support
+const loader = new GLTFLoader();
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+loader.setDRACOLoader(dracoLoader);
+
+// Scene background color based on theme (light/dark)
+function applySceneBackgroundForTheme() {
+  const theme = document.documentElement.getAttribute('data-theme') || 'light';
+  if (theme === 'dark') {
+    // Dark mode: RGB(0, 26, 98)
+    const darkCol = new THREE.Color(0x000c27);
+    scene.background = darkCol;
+    renderer.setClearColor(darkCol, 1);
+  } else {
+    // Light mode: RGB(255, 255, 255)
+    const lightCol = new THREE.Color(0xffffff);
+    scene.background = lightCol;
+    renderer.setClearColor(lightCol, 1);
+  }
+}
+
+// Apply at startup and react to theme changes
+applySceneBackgroundForTheme();
+try {
+  const themeObserver = new MutationObserver(() => applySceneBackgroundForTheme());
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+} catch {}
+
+// UI Elements
 const slider = document.getElementById("model-slider");
 const autoplayButton = document.getElementById("autoplay-button");
 const rotateButton = document.getElementById("rotate-button");
@@ -61,17 +83,35 @@ const loadingText = document.getElementById("loading-text");
 const progressTbody = document.getElementById("progress-tbody");
 const sliderDate = document.getElementById("slider-date");
 const ISO_DATE_RE = /(20\d{2}-\d{2}-\d{2})/;
+
+// Debug: Log what elements were found
+console.log('[INIT] UI Elements found:', {
+  slider: !!slider,
+  autoplayButton: !!autoplayButton,
+  rotateButton: !!rotateButton,
+  prevButton: !!prevButton,
+  nextButton: !!nextButton,
+  modelNameDisplay: !!modelNameDisplay
+});
+
+
 // Read selected project from query param
 const urlProject = new URLSearchParams(location.search).get('project');
 const selectedProject = (urlProject || '').toUpperCase();
 
 let loadedModels = [];
 let autoplayTimer = null;
+let currentModelIndex = 0;
+
 // Disable autoplay until models are loaded to avoid iterating over an empty/default range
 if (autoplayButton) {
   autoplayButton.disabled = true;
   autoplayButton.title = 'Loading models…';
+  console.log('[INIT] Autoplay button disabled until models load');
+} else {
+  console.error('[INIT] Autoplay button NOT FOUND in DOM!');
 }
+
 const DEFAULT_ORBIT_DURATION = 20000; // ms per full revolution
 const AUTOPLAY_DELAY_MS = 1500; // slight delay between frames
 let fileNameToIndex = new Map();
@@ -94,8 +134,6 @@ let tableRowsData = [
   ["Roof Frames","18/4/2025","22/4/2025","23/4/2025","26/4/2025"],
   ["Anchor Bolts 3","23/4/2025","27/4/2025","28/4/2025","1/5/2025"],
 ];
-
-
 
 function buildProgressTable() {
   progressTbody.innerHTML = "";
@@ -154,23 +192,37 @@ function highlightTableRow(i) {
 
 function updateDateLabel(i) {
   const row = tableRowsData[i];
-  if (row) sliderDate.textContent = `Erection: ${row[3]} → ${row[4]}`;
-  else sliderDate.textContent = "";
+  if (sliderDate) {
+    if (row) sliderDate.textContent = `Erection: ${row[3]} → ${row[4]}`;
+    else sliderDate.textContent = "";
+  }
 }
 
 function updateModelVisibility(index) {
+  console.log('[updateModelVisibility] index:', index, 'loadedModels.length:', loadedModels.length);
   const i = parseInt(index);
   if (i < 0 || i >= loadedModels.length) return;
-  loadedModels.forEach((m, idx) => (m.model.visible = idx === i));
-  if (loadedModels[i]) modelNameDisplay.textContent = loadedModels[i].name;
+  
+  // Hide all models
+  loadedModels.forEach(model => {
+    model.visible = false;
+  });
+  
+  // Show the selected model
+  if (loadedModels[i]) {
+    loadedModels[i].visible = true;
+    const modelName = loadedModels[i].userData.originalName || `Model ${i + 1}`;
+    modelNameDisplay.textContent = modelName;
+    console.log('[updateModelVisibility] Showing model:', i, modelName);
+  }
+  
   highlightTableRow(i);
   updateDateLabel(i);
-  // If auto-rotate is running in loop mode, retarget pivot to keep angle continuous
+  
+  // Update rotation if active
   if (orbitState.running && orbitState.loop) {
-    const entry = loadedModels[i];
-    const model = entry?.model;
     const baseYOffset = parseFloat(orbitBaseOffsetInput?.value || 0);
-    retargetPivotForModel(model, baseYOffset);
+    retargetPivotForModel(loadedModels[i], baseYOffset);
   }
 }
 
@@ -179,26 +231,21 @@ function stopAutoplay() {
     clearInterval(autoplayTimer);
     autoplayTimer = null;
     autoplayButton.textContent = "▶";
+    autoplayButton.title = 'Play';
   }
 }
 
 // Orbit (360) state and helpers
-// Orbit (360) state and helpers. Supports single rotation or continuous looping.
 let orbitState = {
   running: false,
   rafId: null,
   lastTime: 0,
   speed: 0, // radians per ms
   loop: false,
-  // Legacy: single pivotRoot no longer used (we rotate all models via per-model pivots)
-  pivotRoot: null,
-  // Keep the current angle so swapping models doesn't reset
   currentAngle: 0,
-  // Accumulator for single-rotation mode
   singleAcc: 0
 };
 
-// Ensure a per-model pivot exists, parent the model to it, and place pivot at model base center
 function ensurePivotForModel(model, baseYOffset = 0) {
   if (!model) return null;
   try {
@@ -211,14 +258,12 @@ function ensurePivotForModel(model, baseYOffset = 0) {
     if (!pivot) {
       pivot = new THREE.Object3D();
       pivot.name = 'orbit-pivot';
-      viewer.context.scene.add(pivot);
+      scene.add(pivot);
       model.userData._orbitPivot = pivot;
     }
     pivot.position.copy(center);
-    // Preserve current world transform while reparenting
     try { pivot.attach(model); }
     catch (e) { model.position.sub(center); pivot.add(model); }
-    // Keep current angle when (re)creating pivots
     pivot.rotation.y = orbitState.currentAngle || 0;
     return pivot;
   } catch (e) {
@@ -227,14 +272,13 @@ function ensurePivotForModel(model, baseYOffset = 0) {
   }
 }
 
-// Backwards-compatible helper: previously retargeted to a shared pivot; now ensures per-model pivot
 function retargetPivotForModel(model, baseYOffset = 0) {
   return ensurePivotForModel(model, baseYOffset);
 }
 
 function prepareAllPivots(baseYOffset = 0) {
-  loadedModels.forEach((entry) => {
-    if (entry?.model) ensurePivotForModel(entry.model, baseYOffset);
+  loadedModels.forEach((model) => {
+    if (model) ensurePivotForModel(model, baseYOffset);
   });
 }
 
@@ -243,23 +287,20 @@ function stopOrbit() {
   orbitState.running = false;
   if (orbitState.rafId) cancelAnimationFrame(orbitState.rafId);
   orbitState.rafId = null;
-  // Reset rotate button UI if present
   try { if (rotateButton) rotateButton.textContent = "⟳"; } catch {}
 }
 
 function startOrbit(durationMs = 20000, loop = false) {
-  // start continuous or single rotation; rotate ALL models via their own pivots
   stopOrbit();
   if (!loadedModels.length) return;
   const baseYOffset = parseFloat(orbitBaseOffsetInput?.value || 0);
   prepareAllPivots(isNaN(baseYOffset) ? 0 : baseYOffset);
-  // Renderer for manual render flush
-  const renderer = viewer.context.getRenderer?.() || viewer.context.renderer;
+  
   orbitState.running = true;
   orbitState.lastTime = performance.now();
   orbitState.loop = Boolean(loop);
-  orbitState.speed = (Math.PI * 2) / durationMs; // radians per ms
-  orbitState.singleAcc = 0; // for single-rotation mode only
+  orbitState.speed = (Math.PI * 2) / durationMs;
+  orbitState.singleAcc = 0;
   try { if (rotateButton) rotateButton.textContent = "⏹"; } catch {}
 
   function frame(now) {
@@ -267,21 +308,17 @@ function startOrbit(durationMs = 20000, loop = false) {
     const delta = now - orbitState.lastTime;
     orbitState.lastTime = now;
     const angle = orbitState.speed * delta;
-    // Rotate per-model pivots (or the model directly if pivot missing)
+    
     try {
       orbitState.currentAngle += angle;
-      for (const entry of loadedModels) {
-        const mdl = entry?.model;
-        if (!mdl) continue;
-        const pv = mdl.userData?._orbitPivot;
+      for (const model of loadedModels) {
+        if (!model) continue;
+        const pv = model.userData?._orbitPivot;
         if (pv) pv.rotation.y = orbitState.currentAngle;
-        else mdl.rotation.y = orbitState.currentAngle;
-      }
-      if (renderer && viewer.context.scene && viewer.context.camera) {
-        renderer.render(viewer.context.scene, viewer.context.camera);
+        else model.rotation.y = orbitState.currentAngle;
       }
     } catch (e) {}
-    // If not looping and have rotated >= 2pi since start, stop.
+    
     if (!orbitState.loop) {
       orbitState.singleAcc += angle;
       if (orbitState.singleAcc >= Math.PI * 2) {
@@ -297,33 +334,35 @@ function startOrbit(durationMs = 20000, loop = false) {
 }
 
 function advanceSlider() {
-  // Use the actual loaded models length instead of the slider's max attribute,
-  // which may be a placeholder value before models finish loading.
+  console.log('[advanceSlider] Called - loadedModels.length:', loadedModels.length, 'current slider:', slider.value);
   const maxVal = Math.max(0, (loadedModels?.length || 0) - 1);
   let nextVal = parseInt(slider.value) + 1;
-  
-  // Stop autoplay when reaching the end instead of looping
-  if (nextVal > maxVal) {
-    stopAutoplay();
-    return;
-  }
-  
+  // Wrap around like the Next button behavior
+  if (nextVal > maxVal) nextVal = 0;
+
+  console.log('[advanceSlider] Setting slider to:', nextVal);
   slider.value = nextVal;
   updateModelVisibility(nextVal);
 }
 
-autoplayButton.addEventListener("click", () => {
-  if (autoplayButton.disabled) return; // still loading
-  if ((loadedModels?.length || 0) <= 1) return; // nothing to iterate
-  if (autoplayTimer) {
-    stopAutoplay();
-    // Pause should only pause autoplay now; rotation remains as-is
-  } else {
-    // Start interval without an immediate jump; first switch happens after the delay
-    autoplayTimer = setInterval(advanceSlider, AUTOPLAY_DELAY_MS);
-    autoplayButton.textContent = "❚❚";
-  }
-});
+// Event listeners
+if (autoplayButton) {
+  autoplayButton.addEventListener("click", () => {
+    console.log('[autoplayButton] Clicked - disabled:', autoplayButton.disabled, 'loadedModels.length:', loadedModels.length, 'autoplayTimer:', autoplayTimer);
+    if (autoplayButton.disabled) return;
+    if ((loadedModels?.length || 0) <= 1) return;
+    if (autoplayTimer) {
+      stopAutoplay();
+    } else {
+      // start autoplay: advance immediately, then continue on an interval
+      console.log('[autoplayButton] Starting autoplay...');
+      advanceSlider();
+      autoplayTimer = setInterval(advanceSlider, AUTOPLAY_DELAY_MS);
+      autoplayButton.textContent = "❚❚";
+      autoplayButton.title = 'Pause';
+    }
+  });
+}
 
 if (rotateButton) {
   rotateButton.addEventListener("click", () => {
@@ -337,14 +376,13 @@ if (rotateButton) {
   });
 }
 
-// Next and previous buttons for manual navigation
 if (nextButton) {
   nextButton.addEventListener("click", () => {
-    if ((loadedModels?.length || 0) <= 1) return; // nothing to iterate
-    stopAutoplay(); // stop autoplay when manually navigating
+    if ((loadedModels?.length || 0) <= 1) return;
+    stopAutoplay();
     const maxVal = Math.max(0, (loadedModels?.length || 0) - 1);
     let nextVal = parseInt(slider.value) + 1;
-    if (nextVal > maxVal) nextVal = 0; // wrap to beginning
+    if (nextVal > maxVal) nextVal = 0;
     slider.value = nextVal;
     updateModelVisibility(nextVal);
   });
@@ -352,20 +390,21 @@ if (nextButton) {
 
 if (prevButton) {
   prevButton.addEventListener("click", () => {
-    if ((loadedModels?.length || 0) <= 1) return; // nothing to iterate
-    stopAutoplay(); // stop autoplay when manually navigating
+    if ((loadedModels?.length || 0) <= 1) return;
+    stopAutoplay();
     const maxVal = Math.max(0, (loadedModels?.length || 0) - 1);
     let prevVal = parseInt(slider.value) - 1;
-    if (prevVal < 0) prevVal = maxVal; // wrap to end
+    if (prevVal < 0) prevVal = maxVal;
     slider.value = prevVal;
     updateModelVisibility(prevVal);
   });
 }
 
-slider.addEventListener("input", (e) => updateModelVisibility(e.target.value));
-slider.addEventListener("change", () => stopAutoplay());
+if (slider) {
+  slider.addEventListener("input", (e) => updateModelVisibility(e.target.value));
+  slider.addEventListener("change", () => stopAutoplay());
+}
 
-// If the base offset changes while rotating, retarget pivot without resetting angle
 if (orbitBaseOffsetInput) {
   orbitBaseOffsetInput.addEventListener('change', () => {
     const baseYOffset = parseFloat(orbitBaseOffsetInput.value || 0);
@@ -373,22 +412,27 @@ if (orbitBaseOffsetInput) {
   });
 }
 
-// Rotation is controlled by its own button (⟳) and is independent of autoplay.
+// Window resize
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
 
-// Resolve the project base folder by probing for a models.json manifest.
+// Resolve the project base folder by probing for a models.json manifest
 async function resolveProjectBase() {
   const candidates = [];
   if (selectedProject) {
-    // common patterns: /projects/BSGS or /BSGS
-    candidates.push(`projects/${selectedProject}`);
     candidates.push(`${selectedProject}`);
+    // Vite serves files in /public at the root URL, so no /public prefix is needed.
+    // Keep only the root-level path.
   }
-  // existing default folder
-  candidates.push("3D MODEL(step1)");
+  // Fallback to BSGS at the root (since public/ maps to "/")
+  candidates.push("BSGS");
 
   for (const base of candidates) {
     try {
-      const manifestUrl = "/" + encodeURIComponent(base) + "/models.json";
+      const manifestUrl = "/" + base + "/models.json";
       const res = await fetch(manifestUrl, { cache: 'no-cache' });
       if (res.ok) {
         const list = await res.json().catch(() => null);
@@ -396,60 +440,51 @@ async function resolveProjectBase() {
       }
     } catch {}
   }
-  // Fallback: fabricate a standard 16-frame sequence in the default folder
+  
+  // Fallback: fabricate a standard sequence (still under BSGS root)
   const total = tableRowsData.length;
-  const names = Array.from({ length: total }, (_, i) => `BCMEOTest_day_${String(i).padStart(3, '0')}.ifc`);
-  return { base: "3D MODEL(step1)", names };
+  const names = Array.from({ length: total }, (_, i) => `Model_${String(i).padStart(3, '0')}.glb`);
+  return { base: "BSGS", names };
 }
 
-async function loadAllIfcs() {
+async function loadAllModels() {
   loadingOverlay.classList.add("visible");
   try {
-    // Figure out which folder to load from and which files
-    const { base, names } = await resolveProjectBase();
-    // Update document title subtly with project for clarity
+  const { base, names } = await resolveProjectBase();
+    
     if (selectedProject) {
-      try { document.title = `${selectedProject} | ` + document.title; } catch {}
+      try { document.title = `${selectedProject} GLB Viewer | ` + document.title; } catch {}
     }
-    // Try to load a per-project schedule.json to populate the table
-    await (async () => {
+    
+    // Try to load schedule
     try {
-      const scheduleUrl = "/" + encodeURIComponent(base) + "/schedule.json";
+      const scheduleUrl = "/" + base + "/schedule.json";
       const res = await fetch(scheduleUrl, { cache: 'no-cache' });
       if (res.ok) {
         const schedule = await res.json();
         if (Array.isArray(schedule) && schedule.length) {
-          // Accept either array-of-arrays or array-of-objects
           const rows = schedule.map((row, i) => {
             if (Array.isArray(row)) return row.slice(0,5);
             if (row && typeof row === 'object') {
-              // Allow object values in date fields to carry {date,file,index,label}
               const fs = row.fabricationStart ?? row.fabrication_start ?? "-";
               const fc = row.fabricationCompletion ?? row.fabrication_end ?? "-";
               const es = row.erectionStart ?? row.erection_start ?? "-";
               const ec = row.erectionCompletion ?? row.erection_end ?? "-";
-              return [
-                row.member ?? `Item ${i+1}`,
-                fs, fc, es, ec
-              ];
+              return [row.member ?? `Item ${i+1}`, fs, fc, es, ec];
             }
             return [`Item ${i+1}`, "-","-","-","-"]; 
           });
           tableRowsData = rows;
           buildProgressTable();
-          return;
         }
       }
     } catch {}
-    // If no schedule, ensure the progress table has one row per IFC file
+    
     if (names.length !== tableRowsData.length) {
-      tableRowsData = names.map((n, i) => [
-        `Sequence ${i+1}`, "-", "-", "-", "-"
-      ]);
+      tableRowsData = names.map((n, i) => [`Sequence ${i+1}`, "-", "-", "-", "-"]);
       buildProgressTable();
     }
-    })();
-    // Build fast lookups to make schedule cells clickable by date or file
+    
     fileNameToIndex = new Map();
     dateToIndex = new Map();
     names.forEach((fname, idx) => {
@@ -457,37 +492,83 @@ async function loadAllIfcs() {
       const m = fname.match(ISO_DATE_RE);
       if (m) dateToIndex.set(m[1], idx);
     });
-    // Rebuild table once lookups exist so clickable styles apply if no schedule
+    
     buildProgressTable();
+    
     const total = names.length;
-    let firstLoaded = true;
     for (let i = 0; i < names.length; i++) {
-      const name = names[i];
-      const url = "/" + encodeURIComponent(base) + "/" + encodeURIComponent(name);
+  const name = names[i];
+  const url = "/" + base + "/" + encodeURIComponent(name);
+      
       try {
-        const res = await fetch(url);
-        if (!res.ok) continue;
-        const buf = await res.arrayBuffer();
-        const file = new File([buf], name);
-        const model = await viewer.IFC.loadIfc(file, firstLoaded);
-        firstLoaded = false;
-        loadedModels.push({ model, name });
-        // If rotation is active, ensure new model also gets a pivot and current angle applied
+        loadingText.textContent = `Loading models... ${Math.round(((i + 1) / total) * 100)}%`;
+        
+        const gltf = await loader.loadAsync(url);
+        const model = gltf.scene;
+        
+        // Setup model properties
+        model.userData.originalName = name;
+        model.visible = false;
+        model.castShadow = true;
+        model.receiveShadow = true;
+        
+        // Enable shadows for all meshes
+        model.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+            if (child.material) {
+              if (Array.isArray(child.material)) {
+                child.material.forEach(mat => {
+                  if (mat.isMeshStandardMaterial) {
+                    mat.envMapIntensity = 1;
+                    mat.needsUpdate = true;
+                  }
+                });
+              } else if (child.material.isMeshStandardMaterial) {
+                child.material.envMapIntensity = 1;
+                child.material.needsUpdate = true;
+              }
+            }
+          }
+        });
+        
+        // Center the model
+        const box = new THREE.Box3().setFromObject(model);
+        const center = box.getCenter(new THREE.Vector3());
+        model.position.sub(center);
+        
+        scene.add(model);
+        loadedModels.push(model);
+        
+        // If rotation is active, ensure new model gets pivot and angle
         if (orbitState.running) {
           const baseYOffset = parseFloat(orbitBaseOffsetInput?.value || 0);
           const pv = ensurePivotForModel(model, isNaN(baseYOffset) ? 0 : baseYOffset);
           if (pv) pv.rotation.y = orbitState.currentAngle || 0;
           else model.rotation.y = orbitState.currentAngle || 0;
         }
-        loadingText.textContent = `Loading models... ${Math.round(((i + 1) / total) * 100)}%`;
+        
       } catch (e) {
-        console.error('Failed to load IFC', name, e);
+        console.error('Failed to load GLB', name, e);
       }
     }
+    
     if (loadedModels.length) {
       slider.max = loadedModels.length - 1;
-      try { updateModelVisibility(0); } catch (e) { console.warn('updateModelVisibility failed', e); }
-      // Enable autoplay now that we have something to play through
+      updateModelVisibility(0);
+      
+      // Position camera to show the first model
+      if (loadedModels[0]) {
+        const box = new THREE.Box3().setFromObject(loadedModels[0]);
+        const size = box.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+        camera.position.set(maxDim * 1.5, maxDim, maxDim * 1.5);
+        camera.lookAt(0, 0, 0);
+        controls.target.set(0, 0, 0);
+        controls.update();
+      }
+      
       if (autoplayButton) {
         autoplayButton.disabled = false;
         autoplayButton.title = 'Play';
@@ -496,12 +577,19 @@ async function loadAllIfcs() {
       loadingText.textContent = 'No models loaded';
     }
   } finally {
-    // Always hide overlay to avoid stuck UI
     loadingOverlay.classList.remove("visible");
-    // Soft failsafe hide after a short delay (just in case)
     setTimeout(() => loadingOverlay.classList.remove('visible'), 1000);
   }
 }
 
+// Animation loop
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+// Initialize
 buildProgressTable();
-loadAllIfcs();
+loadAllModels();
+animate();
