@@ -139,6 +139,29 @@
       border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,.08);
       cursor:pointer;user-select:none;
     }
+    /* Clickable cells base style */
+#progress-tbody td.clickable {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+/* Hover effect */
+#progress-tbody td.clickable:hover {
+  background-color: #fff8cc;
+}
+
+/* Highlight for completed (<= clicked date) */
+#progress-tbody td.clickable.selected {
+  background-color: #fff2a8; /* light yellow */
+  font-weight: 600;
+  color: #444;
+}
+
+/* Optional: smoother table row highlighting */
+#progress-tbody tr:hover td {
+  background-color: #fefae0;
+}
+
     #progress-table.collapsed .table-mini:hover{background:rgba(37,99,235,.1);}    
     /* Hide collapse button once collapsed */
     #progress-table.collapsed .collapse-btn { display:none; }
@@ -253,7 +276,7 @@
       <table>
         <thead>
           <tr>
-            <th>S.No.</th><th>Member</th>
+            <th>Member</th>
             <th>Fab End</th><th>Erec End</th>
           </tr>
         </thead>

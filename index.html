@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>4D GLB Visualization | Able Steel – TSMC Project</title>
+  <title>4D Voyager | Able Steel Projects</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
     :root {
-      --bg: #f9fafc;
+      --bg: #f8fafc;
       --bg-secondary: #ffffff;
       --text: #1e293b;
-      --text-muted: #475569;
+      --text-muted: #64748b;
       --border: rgba(0, 0, 0, 0.08);
       --brand: #2563eb;
       --brand-light: #60a5fa;
@@ -27,29 +29,28 @@
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    html, body {
-      height: 100%;
-      font-family: 'Inter', system-ui, sans-serif;
+    body {
+      font-family: 'Inter', sans-serif;
       background: var(--bg);
       color: var(--text);
       transition: background 0.4s ease, color 0.4s ease;
-      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
 
+    /* HEADER */
     header {
       position: sticky;
       top: 0;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 2px 8px var(--shadow);
+      z-index: 100;
+      padding: 16px 32px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 32px;
-      height: 72px;
-      background: var(--bg-secondary);
-      border-bottom: 1px solid var(--border);
-      box-shadow: 0 2px 10px var(--shadow);
-      z-index: 100;
-      backdrop-filter: blur(8px);
-      transition: all 0.3s ease;
     }
 
     .brand {
@@ -64,8 +65,8 @@
     .brand-logo {
       background: linear-gradient(135deg, var(--brand), var(--brand-light));
       color: white;
-      width: 44px;
-      height: 44px;
+      width: 42px;
+      height: 42px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -74,13 +75,12 @@
       box-shadow: 0 2px 6px rgba(37,99,235,0.3);
     }
 
-    header span {
+    .header-subtitle {
       font-size: 14px;
-      opacity: 0.8;
       color: var(--text-muted);
+      opacity: 0.8;
     }
 
-    /* Toggle Button */
     .theme-toggle {
       cursor: pointer;
       border: 1px solid var(--border);
@@ -92,6 +92,7 @@
       align-items: center;
       justify-content: center;
       transition: all 0.3s ease;
+      font-size: 18px;
     }
 
     .theme-toggle:hover {
@@ -99,107 +100,145 @@
       color: white;
     }
 
+    /* MAIN */
     main {
-      padding: 40px 24px 60px;
+      flex: 1;
       max-width: 1200px;
+      width: 100%;
       margin: 0 auto;
-      transition: color 0.3s ease, background 0.3s ease;
+      padding: 60px 24px;
+      text-align: center;
     }
 
-        h1 {
-      font-size: clamp(24px, 3.5vw, 38px);
+    h1 {
+      font-size: clamp(26px, 3vw, 38px);
       font-weight: 700;
       color: var(--text);
+      margin-bottom: 8px;
     }
 
     .subtitle {
-      margin-top: 10px;
+      font-size: 16px;
       color: var(--text-muted);
-      font-size: 15px;
+      margin-bottom: 50px;
     }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 32px;
-      margin-top: 50px;
-      justify-items: center;
-    }
+    /* === Layout polish for reverse pyramid === */
+.grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 60px; /* increase spacing between rows */
+}
 
-    .card {
-      text-decoration: none;
-      color: inherit;
-      background: var(--bg-secondary);
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      box-shadow: 0 4px 16px var(--shadow);
-      overflow: hidden;
-      transition: all 0.25s ease;
-      display: flex;
-      flex-direction: column;
-    }
+.row {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+.preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* instead of cover */
+  background: var(--bg-secondary);
+  padding: 6px; /* optional small margin inside */
+}
 
-    .card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 8px 24px rgba(37,99,235,0.15);
-      border-color: var(--brand-light);
-    }
+.row.top {
+  max-width: 1100px;
+}
 
-    .preview {
-      position: relative;
-      height: 180px;
-      background: linear-gradient(135deg, #e0ecff, #f1f5ff);
-      overflow: hidden;
-      border-bottom: 1px solid var(--border);
-    }
+.row.bottom {
+  max-width: 750px;
+  margin-top: -20px; /* slight upward pull to form pyramid visually */
+}
 
-    [data-theme="dark"] .preview {
-      background: linear-gradient(135deg, #1e3a8a, #1e40af);
-    }
+/* Center entire grid vertically on larger screens */
+main {
+  flex: 1;
+  max-width: 4000px;
+  margin: 0 auto;
+  padding: 60px 24px 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
 
-    .preview img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
+/* === Card visuals refinement === */
+.card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: 0 8px 22px var(--shadow);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 320px;
+  transition: all 0.3s ease;
+}
 
-    .preview .fallback {
-      position: absolute;
-      inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 18px;
-      color: var(--brand);
-      letter-spacing: 0.4px;
-    }
+.card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(37,99,235,0.18);
+  border-color: var(--brand-light);
+}
 
-    .meta {
-      padding: 16px 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+/* === Visual balance tweaks for images and meta === */
+.preview {
+  position: relative;
+  height: 220px; /* previously 190px */
+  background: linear-gradient(135deg, #e3ecff, #f7faff);
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+}
 
-    .project {
-      font-weight: 600;
-      color: var(--text);
-      font-size: 15px;
-    }
 
-    .tonnage {
-      color: var(--text-muted);
-      font-size: 13px;
-    }
+[data-theme="dark"] .preview {
+  background: linear-gradient(135deg, #1e3a8a, #1e40af);
+}
 
-    footer {
-      text-align: center;
-      margin-top: 50px;
-      font-size: 13px;
-      color: var(--text-muted);
-    }
+.meta {
+  padding: 18px 20px;
+  text-align: left;
+}
+
+.project {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 16.5px;
+}
+
+.tonnage {
+  color: var(--text-muted);
+  font-size: 13.5px;
+  margin-top: 4px;
+}
+
+/* === Responsive fine-tuning === */
+@media (max-width: 1000px) {
+  .grid {
+    gap: 40px;
+  }
+  .row {
+    gap: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .row {
+    flex-direction: column;
+    align-items: center;
+  }
+  .grid {
+    gap: 30px;
+  }
+}
+
   </style>
 </head>
 
@@ -209,73 +248,81 @@
       <div class="brand-logo">4D</div>
       4D Voyager
     </div>
-    <span>Developed by Structures Online (SOL) for Able Steel</span>
+    <span class="header-subtitle">Developed by Structures Online (SOL) for Able Steel</span>
     <div class="theme-toggle" id="themeToggle" title="Toggle Theme">🌙</div>
   </header>
 
   <main>
-    <h1>4D GLB Visualization | Able Steel – TSMC Project</h1>
-    <div class="subtitle">Select a project to launch the interactive 4D GLB Viewer.</div>
+    <h1>4D GLB Visualization Dashboard</h1>
+    <div class="subtitle">Select a project below to launch the interactive viewer.</div>
+
     <section class="grid">
-      <a class="card" href="viewer.html?project=BSGS">
-        <div class="preview">
-          <img src="public/BSGS1.png" alt="BSGS Preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-          <span class="fallback">Preview</span>
-        </div>
-        <div class="meta">
-          <div class="project">Project: BSGS</div>
-          <div class="tonnage">Tonnage: —</div>
-        </div>
-      </a>
+      <!-- TOP ROW (3 CARDS) -->
+      <div class="row top">
+        <a class="card" href="viewer.html?project=BSGS">
+          <div class="preview">
+            <img src="public/BSGS1.png" alt="BSGS Preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <span class="fallback">Preview</span>
+          </div>
+          <div class="meta">
+            <div class="project">Project: BSGS</div>
+            <div class="tonnage">Tonnage: —</div>
+          </div>
+        </a>
 
-      <a class="card" href="viewer.html?project=CUP">
-        <div class="preview">
-          <img src="public/Waste.png" alt="CUP Preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-          <span class="fallback">Preview</span>
-        </div>
-        <div class="meta">
-          <div class="project">Project: Waste Mngm</div>
-          <div class="tonnage">Tonnage: —</div>
-        </div>
-      </a>
+        <a class="card" href="viewer.html?project=CUP">
+          <div class="preview">
+            <img src="public/cupbg.png" alt="CUP Preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <span class="fallback">Preview</span>
+          </div>
+          <div class="meta">
+            <div class="project">Project: CUP</div>
+            <div class="tonnage">Tonnage: —</div>
+          </div>
+        </a>
 
-      <a class="card" href="viewer.html?project=LORRY">
-        <div class="preview">
-          <img src="public/lorry1.png" alt="LORRY Preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-          <span class="fallback">Preview</span>
-        </div>
-        <div class="meta">
-          <div class="project">Project: LORRY</div>
-          <div class="tonnage">Tonnage: —</div>
-        </div>
-      </a>
+        <a class="card" href="viewer.html?project=WRC">
+          <div class="preview">
+            <img src="public/Waste.png" alt="WRC Preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <span class="fallback">Preview</span>
+          </div>
+          <div class="meta">
+            <div class="project">Project: Waste Management</div>
+            <div class="tonnage">Tonnage: —</div>
+          </div>
+        </a>
+      </div>
 
-      <a class="card" href="viewer.html?project=WRC">
-        <div class="preview">
-          <img src="public/CS.png" alt="WRC Preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-          <span class="fallback">Preview</span>
-        </div>
-        <div class="meta">
-          <div class="project">Project: WRC</div>
-          <div class="tonnage">Tonnage: —</div>
-        </div>
-      </a>
+      <!-- BOTTOM ROW (2 CARDS) -->
+      <div class="row bottom">
+        <a class="card" href="viewer.html?project=LORRY">
+          <div class="preview">
+            <img src="public/lorry1.png" alt="LORRY Preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <span class="fallback">Preview</span>
+          </div>
+          <div class="meta">
+            <div class="project">Project: LORRY</div>
+            <div class="tonnage">Tonnage: —</div>
+          </div>
+        </a>
 
-      
-      <a class="card" href="viewer.html?project=WRC">
-        <div class="preview">
-          <img src="public/CS.png" alt="WRC Preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-          <span class="fallback">Preview</span>
-        </div>
-        <div class="meta">
-          <div class="project">Project: WRC</div>
-          <div class="tonnage">Tonnage: —</div>
-        </div>
-      </a>
+        <a class="card" href="viewer.html?project=CS">
+          <div class="preview">
+            <img src="public/CS.png" alt="CS Preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <span class="fallback">Preview</span>
+          </div>
+          <div class="meta">
+            <div class="project">Project: CS</div>
+            <div class="tonnage">Tonnage: —</div>
+          </div>
+        </a>
+      </div>
     </section>
-
-    <footer>© 2025 4D Voyager | Able Steel Project Dashboard</footer>
   </main>
+
+  <footer>© 2025 4D Voyager | Able Steel Project Dashboard</footer>
+
+  <script type="module" src="./index.js"></script>
 
   <script>
     const toggleBtn = document.getElementById('themeToggle');
