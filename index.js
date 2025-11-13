@@ -118,21 +118,21 @@ let fileNameToIndex = new Map();
 let dateToIndex = new Map();
 
 let tableRowsData = [
-  ["Anchor Bolts 1","22/3/2025","26/3/2025","29/3/2025","1/4/2025"],
-  ["Columns","23/3/2025","27/3/2025","30/3/2025","2/4/2025"],
-  ["Braces","24/3/2025","28/3/2025","31/3/2025","3/4/2025"],
-  ["Beams (Level 1)","25/3/2025","30/3/2025","4/4/2025","8/4/2025"],
-  ["Beams (Level 2)","28/3/2025","2/4/2025","6/4/2025","10/4/2025"],
-  ["Misc Items","29/3/2025","3/4/2025","8/4/2025","12/4/2025"],
-  ["Anchor Bolts 2","10/4/2025","14/4/2025","16/4/2025","19/4/2025"],
-  ["Columns","12/4/2025","16/4/2025","17/4/2025","20/4/2025"],
-  ["Braces","13/4/2025","17/4/2025","19/4/2025","22/4/2025"],
-  ["Beams (Area A)","13/4/2025","17/4/2025","20/4/2025","23/4/2025"],
-  ["Beams (Area B)","14/4/2025","18/4/2025","21/4/2025","24/4/2025"],
-  ["Beams (Area C)","15/4/2025","19/4/2025","22/4/2025","25/4/2025"],
-  ["Misc Items","17/4/2025","21/4/2025","23/4/2025","26/4/2025"],
-  ["Roof Frames","18/4/2025","22/4/2025","23/4/2025","26/4/2025"],
-  ["Anchor Bolts 3","23/4/2025","27/4/2025","28/4/2025","1/5/2025"],
+  ["Anchor Bolts 1","26/3/2025","1/4/2025"],
+  ["Columns","27/3/2025","2/4/2025"],
+  ["Braces","28/3/2025","3/4/2025"],
+  ["Beams (Level 1)","30/3/2025","8/4/2025"],
+  ["Beams (Level 2)","2/4/2025","10/4/2025"],
+  ["Misc Items","3/4/2025","12/4/2025"],
+  ["Anchor Bolts 2","14/4/2025","19/4/2025"],
+  ["Columns","16/4/2025","20/4/2025"],
+  ["Braces","17/4/2025","22/4/2025"],
+  ["Beams (Area A)","17/4/2025","23/4/2025"],
+  ["Beams (Area B)","18/4/2025","24/4/2025"],
+  ["Beams (Area C)","19/4/2025","25/4/2025"],
+  ["Misc Items","21/4/2025","26/4/2025"],
+  ["Roof Frames","22/4/2025","26/4/2025"],
+  ["Anchor Bolts 3","27/4/2025","1/5/2025"],
 ];
 
 function buildProgressTable() {
@@ -140,7 +140,7 @@ function buildProgressTable() {
   tableRowsData.forEach((r, i) => {
     const tr = document.createElement("tr");
     // build cells manually to allow clickable date/file mapping
-    const cells = [String(i+1), r[0], r[1], r[2], r[3], r[4]];
+    const cells = [String(i+1), r[0], r[1], r[2]];
     cells.forEach((cell, ci) => {
       const td = document.createElement("td");
       if (ci === 0) {
@@ -188,6 +188,26 @@ function highlightTableRow(i) {
   progressTbody.querySelectorAll("tr").forEach((tr, idx) => {
     tr.classList.toggle("active", idx === i);
   });
+  
+  // Auto-scroll to keep current row visible in the 4-row viewport
+  const activeRow = progressTbody.querySelector("tr.active");
+  if (activeRow) {
+    const container = document.querySelector("#progress-table .table-container");
+    if (container) {
+      const rowHeight = 45; // Fixed row height from CSS
+      const containerHeight = container.clientHeight;
+      const headerHeight = 45; // Header height
+      const visibleRows = Math.floor((containerHeight - headerHeight) / rowHeight);
+      
+      // Calculate optimal scroll position to center the active row
+      const targetScrollTop = Math.max(0, (i - Math.floor(visibleRows / 2)) * rowHeight);
+      
+      container.scrollTo({
+        top: targetScrollTop,
+        behavior: 'smooth'
+      });
+    }
+  }
 }
 
 function updateDateLabel(i) {
@@ -464,15 +484,13 @@ async function loadAllModels() {
         const schedule = await res.json();
         if (Array.isArray(schedule) && schedule.length) {
           const rows = schedule.map((row, i) => {
-            if (Array.isArray(row)) return row.slice(0,5);
+            if (Array.isArray(row)) return row.slice(0,3);
             if (row && typeof row === 'object') {
-              const fs = row.fabricationStart ?? row.fabrication_start ?? "-";
               const fc = row.fabricationCompletion ?? row.fabrication_end ?? "-";
-              const es = row.erectionStart ?? row.erection_start ?? "-";
               const ec = row.erectionCompletion ?? row.erection_end ?? "-";
-              return [row.member ?? `Item ${i+1}`, fs, fc, es, ec];
+              return [row.member ?? `Item ${i+1}`, fc, ec];
             }
-            return [`Item ${i+1}`, "-","-","-","-"]; 
+            return [`Item ${i+1}`, "-", "-"]; 
           });
           tableRowsData = rows;
           buildProgressTable();
@@ -481,7 +499,7 @@ async function loadAllModels() {
     } catch {}
     
     if (names.length !== tableRowsData.length) {
-      tableRowsData = names.map((n, i) => [`Sequence ${i+1}`, "-", "-", "-", "-"]);
+      tableRowsData = names.map((n, i) => [`Sequence ${i+1}`, "-", "-"]);
       buildProgressTable();
     }
     

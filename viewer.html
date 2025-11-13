@@ -56,10 +56,12 @@
     }
     .legend-item{display:flex;align-items:center;gap:6px;white-space:nowrap;}
     .legend-color{width:12px;height:12px;border-radius:3px;}
-    .yellow{background:#facc15;}
-    .red{background:#ef4444;}
-    .blue{background:#3b82f6;}
-    .green{background:#22c55e;}
+
+    
+.light-red { background-color: #ff9999; }
+.red { background-color: #ff0000; }
+.green { background-color: #00cc00; }
+.dark-green { background-color: #006600; }
 
     /* ===== THEME TOGGLE ===== */
     .theme-toggle {
@@ -94,14 +96,25 @@
     canvas { background-color: black; }
     /* ===== TABLE ===== */
     #progress-table{
-      position:fixed;right:30px;top:90px;bottom:205px;width:580px;
-      overflow-y:auto;background:var(--bg-panel);
+      position:fixed;right:30px;top:90px;width:380px;
+      background:var(--bg-panel);
       backdrop-filter:blur(14px);
       border:1px solid var(--border);border-radius:12px;
       box-shadow:0 4px 14px rgba(0,0,0,.08);
       color:var(--text);z-index:45;
       transition:background 0.3s ease,color 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      height: auto;
+      max-height: 225px; /* Header (45px) + 4 rows (45px each) = 225px */
     }
+    
+    .table-container {
+      overflow-y: auto;
+      flex: 1;
+      scroll-behavior: smooth;
+    }
+    
     #progress-table .collapse-btn{
       position:absolute;top:8px;right:8px;z-index:1;
       width:28px;height:28px;border-radius:6px;border:1px solid var(--border);
@@ -117,7 +130,7 @@
       width:auto;height:auto;overflow:visible;padding:0;
       background:transparent;border:0;box-shadow:none;
     }
-    #progress-table.collapsed table{display:none;}
+    #progress-table.collapsed .table-container{display:none;}
     #progress-table .table-mini{display:none;}
     #progress-table.collapsed .table-mini{
       display:flex;align-items:center;gap:8px;
@@ -133,6 +146,7 @@
     #progress-table th,#progress-table td{
       padding:10px 12px;border-bottom:1px solid var(--border);
       text-align:left;font-size:13px;
+      height: 45px; /* Fixed row height for consistent scrolling */
     }
     #progress-table th{
       background:rgba(232,240,255,.9);
@@ -216,16 +230,17 @@
 
 <body>
   <!-- HEADER -->
-  <header id="app-header">
+     <header id="app-header">
     <div class="brand-box">4D Voyager</div>
     <div class="legend-inline">
-      <div class="legend-item"><div class="legend-color yellow"></div> Fab Start</div>
+      <div class="legend-item"><div class="legend-color light-red"></div> Fab Start</div>
       <div class="legend-item"><div class="legend-color red"></div> Fab End</div>
-      <div class="legend-item"><div class="legend-color blue"></div> Erec Start</div>
-      <div class="legend-item"><div class="legend-color green"></div> Erec End</div>
+      <div class="legend-item"><div class="legend-color green"></div> Erec Start</div>
+      <div class="legend-item"><div class="legend-color dark-green"></div> Erec End</div>
     </div>
     <div class="theme-toggle" id="themeToggle" title="Toggle Theme">🌙</div>
   </header>
+
 
   <!-- VIEWER -->
   <div id="viewer-container"></div>
@@ -234,16 +249,17 @@
   <!-- TABLE -->
   <div id="progress-table">
     <button class="collapse-btn" id="progress-collapse" title="Hide table">❌</button>
-    <table>
-      <thead>
-        <tr>
-          <th>S.No.</th><th>Member</th>
-          <th>Fab Start</th><th>Fab End</th>
-          <th>Erec Start</th><th>Erec End</th>
-        </tr>
-      </thead>
-      <tbody id="progress-tbody"></tbody>
-    </table>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>S.No.</th><th>Member</th>
+            <th>Fab End</th><th>Erec End</th>
+          </tr>
+        </thead>
+        <tbody id="progress-tbody"></tbody>
+      </table>
+    </div>
     <div class="table-mini" id="progress-mini" title="Show table">📋 Table</div>
   </div>
 

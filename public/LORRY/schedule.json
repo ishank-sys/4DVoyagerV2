@@ -1,156 +1,72 @@
 [
   {
-    "member": "Anchor Bolts & Embeds",
-    "fabricationStart": { "file": "301_LORRY_3D MODEL1.ifc", "date": "2027-01-18" },
-    "fabricationCompletion": { "file": "301_LORRY_3D MODEL1.ifc", "date": "2027-01-24" },
-    "erectionStart": { "file": "301_LORRY_3D MODEL1.ifc", "date": "2025-03-15" },
-    "erectionCompletion": { "file": "301_LORRY_3D MODEL1.ifc", "date": "2025-03-22" }
+    "member": "Foundation & Anchors",
+    "fabricationStart": { "file": "301_LORRY_3D MODEL-Off-1.glb", "date": "2025-01-15" },
+    "fabricationCompletion": { "file": "301_LORRY_3D MODEL-Off-15.glb", "date": "2025-01-20" },
+    "erectionStart": { "file": "301_LORRY_3D MODEL-Off-75.glb", "date": "2025-01-25" },
+    "erectionCompletion": { "file": "301_LORRY_3D MODEL-Off-92.glb", "date": "2025-01-30" }
   },
   {
-    "member": "Columns",
-    "fabricationStart": { "file": "301_LORRY_3D MODEL2.ifc", "date": "2027-01-25" },
-    "fabricationCompletion": { "file": "301_LORRY_3D MODEL2.ifc", "date": "2027-01-26" },
-    "erectionStart": { "file": "301_LORRY_3D MODEL2.ifc", "date": "2025-03-22" },
-    "erectionCompletion": { "file": "301_LORRY_3D MODEL2.ifc", "date": "2025-03-23" }
+    "member": "Ground Level Columns",
+    "fabricationStart": { "file": "301_LORRY_3D MODEL-Off-4.glb", "date": "2025-02-01" },
+    "fabricationCompletion": { "file": "301_LORRY_3D MODEL-Off-30.glb", "date": "2025-02-05" },
+    "erectionStart": { "file": "301_LORRY_3D MODEL-Off-79.glb", "date": "2025-02-08" },
+    "erectionCompletion": { "file": "301_LORRY_3D MODEL-Off-106.glb", "date": "2025-02-12" }
   },
   {
-    "member": "Beams",
-    "fabricationStart": { "file": "301_LORRY_3D MODEL3.ifc", "date": "2027-01-27" },
-    "fabricationCompletion": { "file": "301_LORRY_3D MODEL3.ifc", "date": "2027-01-28" },
-    "erectionStart": { "file": "301_LORRY_3D MODEL3.ifc", "date": "2025-03-24" },
-    "erectionCompletion": { "file": "301_LORRY_3D MODEL3.ifc", "date": "2025-03-27" }
+    "member": "Level 1 Beams",
+    "fabricationStart": { "file": "301_LORRY_3D MODEL-Off-7.glb", "date": "2025-02-15" },
+    "fabricationCompletion": { "file": "301_LORRY_3D MODEL-Off-46.glb", "date": "2025-02-18" },
+    "erectionStart": { "file": "301_LORRY_3D MODEL-Off-81.glb", "date": "2025-02-20" },
+    "erectionCompletion": { "file": "301_LORRY_3D MODEL-Off-119.glb", "date": "2025-02-25" }
   },
   {
-    "member": "Misc",
-    "fabricationStart": { "file": "301_LORRY_3D MODEL4.ifc", "date": "2027-01-29" },
-    "fabricationCompletion": { "file": "301_LORRY_3D MODEL4.ifc", "date": "2027-01-29" },
-    "erectionStart": { "file": "301_LORRY_3D MODEL4.ifc", "date": "2025-03-28" },
-    "erectionCompletion": { "file": "301_LORRY_3D MODEL4.ifc", "date": "2025-03-28" }
+    "member": "Level 2 Columns",
+    "fabricationStart": { "file": "301_LORRY_3D MODEL-Off-11.glb", "date": "2025-02-28" },
+    "fabricationCompletion": { "file": "301_LORRY_3D MODEL-Off-60.glb", "date": "2025-03-05" },
+    "erectionStart": { "file": "301_LORRY_3D MODEL-Off-85.glb", "date": "2025-03-08" },
+    "erectionCompletion": { "file": "301_LORRY_3D MODEL-Off-134.glb", "date": "2025-03-12" }
   },
   {
-    "member": "Columns",
-    "fabricationStart": { "file": "301_LORRY_3D MODEL5.ifc", "date": "2027-01-30" },
-    "fabricationCompletion": { "file": "301_LORRY_3D MODEL5.ifc", "date": "2027-02-02" },
-    "erectionStart": { "file": "301_LORRY_3D MODEL5.ifc", "date": "2025-03-29" },
-    "erectionCompletion": { "file": "301_LORRY_3D MODEL5.ifc", "date": "2025-04-04" }
+    "member": "Level 2 Beams",
+    "fabricationStart": { "file": "301_LORRY_3D MODEL-Off-19.glb", "date": "2025-03-15" },
+    "fabricationCompletion": { "file": "301_LORRY_3D MODEL-Off-68.glb", "date": "2025-03-18" },
+    "erectionStart": { "file": "301_LORRY_3D MODEL-Off-88.glb", "date": "2025-03-20" },
+    "erectionCompletion": { "file": "301_LORRY_3D MODEL-Off-141.glb", "date": "2025-03-25" }
   },
   {
-    "member": "Beams",
-    "fabricationStart": { "file": "301_LORRY_3D MODEL6.ifc", "date": "2027-02-03" },
-    "fabricationCompletion": { "file": "301_LORRY_3D MODEL6.ifc", "date": "2027-02-07" },
-    "erectionStart": { "file": "301_LORRY_3D MODEL6.ifc", "date": "2025-04-04" },
-    "erectionCompletion": { "file": "301_LORRY_3D MODEL6.ifc", "date": "2025-04-12" }
+    "member": "Level 3 Columns",
+    "fabricationStart": { "file": "301_LORRY_3D MODEL-Off-21.glb", "date": "2025-03-28" },
+    "fabricationCompletion": { "file": "301_LORRY_3D MODEL-Off-52.glb", "date": "2025-04-01" },
+    "erectionStart": { "file": "301_LORRY_3D MODEL-Off-97.glb", "date": "2025-04-05" },
+    "erectionCompletion": { "file": "301_LORRY_3D MODEL-Off-127.glb", "date": "2025-04-08" }
   },
   {
-    "member": "Misc",
-    "fabricationStart": { "file": "301_LORRY_3D MODEL7.ifc", "date": "2027-02-08" },
-    "fabricationCompletion": { "file": "301_LORRY_3D MODEL7.ifc", "date": "2027-02-09" },
-    "erectionStart": { "file": "301_LORRY_3D MODEL7.ifc", "date": "2025-04-12" },
-    "erectionCompletion": { "file": "301_LORRY_3D MODEL7.ifc", "date": "2025-04-14" }
+    "member": "Level 3 Beams",
+    "fabricationStart": { "file": "301_LORRY_3D MODEL-Off-25.glb", "date": "2025-04-10" },
+    "fabricationCompletion": { "file": "301_LORRY_3D MODEL-Off-56.glb", "date": "2025-04-15" },
+    "erectionStart": { "file": "301_LORRY_3D MODEL-Off-101.glb", "date": "2025-04-18" },
+    "erectionCompletion": { "file": "301_LORRY_3D MODEL-Off-131.glb", "date": "2025-04-22" }
   },
   {
-    "member": "Columns",
-    "fabricationStart": { "file": "301_LORRY_3D MODEL8.ifc", "date": "2027-02-10" },
-    "fabricationCompletion": { "file": "301_LORRY_3D MODEL8.ifc", "date": "2027-02-11" },
-    "erectionStart": { "file": "301_LORRY_3D MODEL8.ifc", "date": "2025-04-15" },
-    "erectionCompletion": { "file": "301_LORRY_3D MODEL8.ifc", "date": "2025-04-21" }
+    "member": "Roof Structure",
+    "fabricationStart": { "file": "301_LORRY_3D MODEL-Off-32.glb", "date": "2025-04-25" },
+    "fabricationCompletion": { "file": "301_LORRY_3D MODEL-Off-64.glb", "date": "2025-04-28" },
+    "erectionStart": { "file": "301_LORRY_3D MODEL-Off-108.glb", "date": "2025-05-01" },
+    "erectionCompletion": { "file": "301_LORRY_3D MODEL-Off-138.glb", "date": "2025-05-05" }
   },
   {
-    "member": "Beams",
-    "fabricationStart": { "file": "301_LORRY_3D MODEL9.ifc", "date": "2027-02-12" },
-    "fabricationCompletion": { "file": "301_LORRY_3D MODEL9.ifc", "date": "2027-02-13" },
-    "erectionStart": { "file": "301_LORRY_3D MODEL9.ifc", "date": "2025-04-21" },
-    "erectionCompletion": { "file": "301_LORRY_3D MODEL9.ifc", "date": "2025-04-29" }
+    "member": "Cladding & Finishes",
+    "fabricationStart": { "file": "301_LORRY_3D MODEL-Off-36.glb", "date": "2025-05-08" },
+    "fabricationCompletion": { "file": "301_LORRY_3D MODEL-Off-71.glb", "date": "2025-05-12" },
+    "erectionStart": { "file": "301_LORRY_3D MODEL-Off-112.glb", "date": "2025-05-15" },
+    "erectionCompletion": { "file": "301_LORRY_3D MODEL-Off-145.glb", "date": "2025-05-20" }
   },
   {
-    "member": "Misc",
-    "fabricationStart": { "file": "301_LORRY_3D MODEL10.ifc", "date": "2027-02-14" },
-    "fabricationCompletion": { "file": "301_LORRY_3D MODEL10.ifc", "date": "2027-02-14" },
-    "erectionStart": { "file": "301_LORRY_3D MODEL10.ifc", "date": "2025-04-29" },
-    "erectionCompletion": { "file": "301_LORRY_3D MODEL10.ifc", "date": "2025-05-01" }
-  },
-  {
-    "member": "Columns",
-    "fabricationStart": { "file": "301_LORRY_3D MODEL11.ifc", "date": "2027-02-15" },
-    "fabricationCompletion": { "file": "301_LORRY_3D MODEL11.ifc", "date": "2027-02-16" },
-    "erectionStart": { "file": "301_LORRY_3D MODEL11.ifc", "date": "2025-05-02" },
-    "erectionCompletion": { "file": "301_LORRY_3D MODEL11.ifc", "date": "2025-05-08" }
-  },
-  {
-    "member": "Beams",
-    "fabricationStart": { "file": "301_LORRY_3D MODEL12.ifc", "date": "2027-02-17" },
-    "fabricationCompletion": { "file": "301_LORRY_3D MODEL12.ifc", "date": "2027-02-18" },
-    "erectionStart": { "file": "301_LORRY_3D MODEL12.ifc", "date": "2025-05-08" },
-    "erectionCompletion": { "file": "301_LORRY_3D MODEL12.ifc", "date": "2025-05-16" }
-  },
-  {
-    "member": "Misc",
-    "fabricationStart": { "file": "301_LORRY_3D MODEL13.ifc", "date": "2027-02-19" },
-    "fabricationCompletion": { "file": "301_LORRY_3D MODEL13.ifc", "date": "2027-02-19" },
-    "erectionStart": { "file": "301_LORRY_3D MODEL13.ifc", "date": "2025-05-16" },
-    "erectionCompletion": { "file": "301_LORRY_3D MODEL13.ifc", "date": "2025-05-18" }
-  },
-  {
-    "member": "Columns",
-    "fabricationStart": { "file": "301_LORRY_3D MODEL14.ifc", "date": "2027-02-20" },
-    "fabricationCompletion": { "file": "301_LORRY_3D MODEL14.ifc", "date": "2027-02-20" },
-    "erectionStart": { "file": "301_LORRY_3D MODEL14.ifc", "date": "2025-05-19" },
-    "erectionCompletion": { "file": "301_LORRY_3D MODEL14.ifc", "date": "2025-05-19" }
-  },
-  {
-    "member": "Beams",
-    "fabricationStart": { "file": "301_LORRY_3D MODEL15.ifc", "date": "2027-02-21" },
-    "fabricationCompletion": { "file": "301_LORRY_3D MODEL15.ifc", "date": "2027-02-21" },
-    "erectionStart": { "file": "301_LORRY_3D MODEL15.ifc", "date": "2025-05-20" },
-    "erectionCompletion": { "file": "301_LORRY_3D MODEL15.ifc", "date": "2025-05-21" }
-  },
-  {
-    "member": "Truss",
-    "fabricationStart": { "file": "301_LORRY_3D MODEL16.ifc", "date": "2027-02-24" },
-    "fabricationCompletion": { "file": "301_LORRY_3D MODEL16.ifc", "date": "2027-02-25" },
-    "erectionStart": { "file": "301_LORRY_3D MODEL16.ifc", "date": "2025-05-22" },
-    "erectionCompletion": { "file": "301_LORRY_3D MODEL16.ifc", "date": "2025-05-24" }
-  },
-  {
-    "member": "Columns",
-    "fabricationStart": { "file": "301_LORRY_3D MODEL17.ifc", "date": "2027-02-23" },
-    "fabricationCompletion": { "file": "301_LORRY_3D MODEL17.ifc", "date": "2027-02-25" },
-    "erectionStart": { "file": "301_LORRY_3D MODEL17.ifc", "date": "2025-05-23" },
-    "erectionCompletion": { "file": "301_LORRY_3D MODEL17.ifc", "date": "2025-05-26" }
-  },
-  {
-    "member": "Beams",
-    "fabricationStart": { "file": "301_LORRY_3D MODEL18.ifc", "date": "2027-02-26" },
-    "fabricationCompletion": { "file": "301_LORRY_3D MODEL18.ifc", "date": "2027-03-02" },
-    "erectionStart": { "file": "301_LORRY_3D MODEL18.ifc", "date": "2025-05-27" },
-    "erectionCompletion": { "file": "301_LORRY_3D MODEL18.ifc", "date": "2025-06-02" }
-  },
-  {
-    "member": "Misc",
-    "fabricationStart": { "file": "301_LORRY_3D MODEL19.ifc", "date": "2027-03-03" },
-    "fabricationCompletion": { "file": "301_LORRY_3D MODEL19.ifc", "date": "2027-03-03" },
-    "erectionStart": { "file": "301_LORRY_3D MODEL19.ifc", "date": "2025-06-03" },
-    "erectionCompletion": { "file": "301_LORRY_3D MODEL19.ifc", "date": "2025-06-04" }
-  },
-  {
-    "member": "Columns",
-    "fabricationStart": { "file": "301_LORRY_3D MODEL20.ifc", "date": "2027-03-04" },
-    "fabricationCompletion": { "file": "301_LORRY_3D MODEL20.ifc", "date": "2027-03-04" },
-    "erectionStart": { "file": "301_LORRY_3D MODEL20.ifc", "date": "2025-06-05" },
-    "erectionCompletion": { "file": "301_LORRY_3D MODEL20.ifc", "date": "2025-06-05" }
-  },
-  {
-    "member": "Beams",
-    "fabricationStart": { "file": "301_LORRY_3D MODEL21.ifc", "date": "2027-03-05" },
-    "fabricationCompletion": { "file": "301_LORRY_3D MODEL21.ifc", "date": "2027-03-08" },
-    "erectionStart": { "file": "301_LORRY_3D MODEL21.ifc", "date": "2025-06-06" },
-    "erectionCompletion": { "file": "301_LORRY_3D MODEL21.ifc", "date": "2025-06-13" }
-  },
-  {
-    "member": "Misc",
-    "fabricationStart": { "file": "301_LORRY_3D MODEL22.ifc", "date": "2027-03-09" },
-    "fabricationCompletion": { "file": "301_LORRY_3D MODEL22.ifc", "date": "2027-03-12" },
-    "erectionStart": { "file": "301_LORRY_3D MODEL22.ifc", "date": "2025-06-14" },
-    "erectionCompletion": { "file": "301_LORRY_3D MODEL22.ifc", "date": "2025-06-18" }
+    "member": "Final Assembly",
+    "fabricationStart": { "file": "301_LORRY_3D MODEL-Off-38.glb", "date": "2025-05-22" },
+    "fabricationCompletion": { "file": "301_LORRY_3D MODEL-Off-43.glb", "date": "2025-05-25" },
+    "erectionStart": { "file": "301_LORRY_3D MODEL-Off-115.glb", "date": "2025-05-28" },
+    "erectionCompletion": { "file": "301_LORRY_3D MODEL-Off-153.glb", "date": "2025-06-01" }
   }
 ]
