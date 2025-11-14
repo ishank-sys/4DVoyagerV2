@@ -85,6 +85,8 @@ let autoplayTimer = null;
 let currentModelIndex = 0;
 let scheduleData = [];
 let currentProject = null;
+// Map timeline index -> cell element for highlight updates
+let timelineCells = [];
 
 let orbitState = {
   running: false,
@@ -138,6 +140,15 @@ function updateModelVisibility(index) {
     modelNameDisplay.textContent = loadedModels[index].userData.originalName || `Model ${index + 1}`;
   }
 }
+// Unified helper: always load model at index (even when autoplay paused)
+function showModelAt(rawIndex) {
+  if (!loadedModels.length) return;
+  const i = Math.max(0, Math.min(parseInt(rawIndex, 10) || 0, loadedModels.length - 1));
+  stopAutoplay(); // ensure paused state doesn't block switching
+  slider.value = String(i);
+  updateModelVisibility(i);
+  updateTimelineHighlight(i);
+}
 function stopAutoplay() {
   if (autoplayTimer) {
     clearInterval(autoplayTimer);
@@ -177,6 +188,16 @@ autoplayButton?.addEventListener("click", () => {
     autoplayButton.textContent = "❚❚";
   }
 });
+
+// === Slider direct interaction ===
+if (slider) {
+  slider.addEventListener('input', (e) => {
+    showModelAt(e.target.value);
+  });
+  slider.addEventListener('change', (e) => {
+    showModelAt(e.target.value);
+  });
+}
 
 // === Rotation ===
 rotateButton?.addEventListener("click", () => {
@@ -281,17 +302,30 @@ async function loadScheduleForProject(project) {
 
     // Build table from schedule.json
     progressTbody.innerHTML = "";
+    timelineCells = []; // reset mapping
     scheduleData.forEach((item, idx) => {
       const tr = document.createElement("tr");
       // map each member to two timeline indices (fab/erec)
       const fabIdx = idx * 2;
       const ercIdx = idx * 2 + 1;
-
-      tr.innerHTML = `
-        <td>${item.member}</td>
-        <td class="clickable" data-index="${fabIdx}" data-date="${item.fabricationCompletion.date}">${item.fabricationCompletion.date}</td>
-        <td class="clickable" data-index="${ercIdx}" data-date="${item.erectionCompletion.date}">${item.erectionCompletion.date}</td>
-      `;
+      const memberTd = document.createElement('td');
+      memberTd.textContent = item.member;
+      const fabTd = document.createElement('td');
+      fabTd.className = 'clickable';
+      fabTd.dataset.index = String(fabIdx);
+      fabTd.dataset.date = item.fabricationCompletion.date;
+      fabTd.dataset.type = 'fab';
+      fabTd.textContent = item.fabricationCompletion.date;
+      const erecTd = document.createElement('td');
+      erecTd.className = 'clickable';
+      erecTd.dataset.index = String(ercIdx);
+      erecTd.dataset.date = item.erectionCompletion.date;
+      erecTd.dataset.type = 'erec';
+      erecTd.textContent = item.erectionCompletion.date;
+      tr.appendChild(memberTd);
+      tr.appendChild(fabTd);
+      tr.appendChild(erecTd);
+      timelineCells.push(fabTd, erecTd);
       progressTbody.appendChild(tr);
     });
 
@@ -309,19 +343,11 @@ async function loadScheduleForProject(project) {
 
     cells.forEach(cell => {
       cell.addEventListener("click", (e) => {
-        stopAutoplay();
         const idxStr = e.currentTarget.dataset.index;
         const dateStr = e.currentTarget.dataset.date;
         const index = Number(idxStr);
-
         if (!Number.isFinite(index)) return;
-
-        const maxIndex = Math.max(0, loadedModels.length - 1);
-        const safeIndex = Math.min(index, maxIndex);
-
-        slider.value = String(safeIndex);
-        updateModelVisibility(safeIndex);
-
+        showModelAt(index);
         if (dateStr) highlightUpTo(dateStr);
       });
     });
@@ -330,6 +356,25 @@ async function loadScheduleForProject(project) {
     console.error(`Error loading schedule for ${project}:`, err);
     // fallback: if schedule fails, leave any existing table alone
   }
+}
+
+// Highlight fabrication/erection cells based on current slider index
+function updateTimelineHighlight(currentIndex) {
+  timelineCells.forEach(cell => {
+    const idx = parseInt(cell.dataset.index, 10);
+    const type = cell.dataset.type;
+    // Remove previous state classes
+    cell.classList.remove('fab-done','fab-current','erec-done','erec-current');
+    if (Number.isFinite(idx) && idx <= currentIndex) {
+      if (idx === currentIndex) {
+        if (type === 'fab') cell.classList.add('fab-current');
+        else if (type === 'erec') cell.classList.add('erec-current');
+      } else {
+        if (type === 'fab') cell.classList.add('fab-done');
+        else if (type === 'erec') cell.classList.add('erec-done');
+      }
+    }
+  });
 }
 
 

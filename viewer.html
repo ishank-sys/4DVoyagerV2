@@ -157,6 +157,30 @@
   color: #444;
 }
 
+/* New: fabrication / erection progressive highlight shades */
+/* Fabrication end (red shade) */
+#progress-tbody td.fab-done {
+  background: linear-gradient(90deg,#ffecec,#ffd4d4);
+  color:#7f1d1d;
+  font-weight:600;
+}
+#progress-tbody td.fab-current { /* exact current index */
+  background: linear-gradient(90deg,#ffb3b3,#ff8a8a);
+  color:#7f1d1d;
+  font-weight:700;
+}
+/* Erection end (green shade) */
+#progress-tbody td.erec-done {
+  background: linear-gradient(90deg,#e9ffe9,#d2ffd2);
+  color:#064e3b;
+  font-weight:600;
+}
+#progress-tbody td.erec-current {
+  background: linear-gradient(90deg,#b8ffb8,#8dff8d);
+  color:#064e3b;
+  font-weight:700;
+}
+
 /* Optional: smoother table row highlighting */
 #progress-tbody tr:hover td {
   background-color: #fefae0;
