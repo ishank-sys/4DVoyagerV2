@@ -36,6 +36,29 @@ function setupControls() {
 }
 setupControls();
 
+// Allow adjusting the zoom target on LORRY by Ctrl+Clicking the model
+renderer.domElement.addEventListener('pointerdown', (e) => {
+  try {
+    if (currentProject !== 'LORRY') return;
+    if (!(e.ctrlKey || e.metaKey)) return; // require modifier to avoid accidental changes
+    const visibleModel = loadedModels.find(m => m.visible);
+    if (!visibleModel) return;
+    const rect = renderer.domElement.getBoundingClientRect();
+    pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(pointer, camera);
+    const hits = raycaster.intersectObject(visibleModel, true);
+    if (!hits.length) return;
+    const hitPoint = hits[0].point;
+    // Maintain current camera offset from target, but move both to the hit point
+    const offset = new THREE.Vector3().subVectors(camera.position, controls.target);
+    controls.target.copy(hitPoint);
+    camera.position.copy(hitPoint.clone().add(offset));
+    camera.lookAt(controls.target);
+    controls.update();
+  } catch {}
+});
+
 // === Lighting ===
 function setupLighting() {
   const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 2.5);
@@ -87,6 +110,26 @@ let scheduleData = [];
 let currentProject = null;
 // Map timeline index -> cell element for highlight updates
 let timelineCells = [];
+// Array of timeline events built from schedule (fab/erec)
+let timelineEvents = [];
+let timelinePopupEl = document.getElementById('timeline-popup');
+// Maps for filename-based navigation and highlight sync
+let filenameToModelIndex = new Map();
+let filenameToTimelineIndex = new Map();
+
+// Normalize filenames between schedule entries and actual files
+// Examples:
+//  - "BSGSifc-114.glb" -> "ifc-114"
+//  - "BSGSifc-35" -> "ifc-35"
+//  - "ifc-35" -> "ifc-35"
+//  - "BSGSifc.glb" -> "ifc"
+function normalizeFileKey(name) {
+  if (!name || typeof name !== 'string') return null;
+  let base = name.split('/').pop().trim().toLowerCase();
+  base = base.replace(/\.glb$/i, '');
+  base = base.replace(/^bsgs/, ''); // strip project prefix if present
+  return base; // e.g., "ifc-114" or "ifc"
+}
 
 let orbitState = {
   running: false,
@@ -95,6 +138,42 @@ let orbitState = {
   speed: 0,
   currentAngle: 0
 };
+// Raycasting helpers for interactive target picking
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+
+// Adjustable camera defaults for LORRY (can be tuned easily)
+const LORRY_CAMERA_DEFAULTS = {
+  elevationDeg: 40,    // restore the nice balanced top view
+  azimuthDeg: 30,      // back to a slightly side angle
+  distanceFactor: 0.01, // closer to fill more of the viewport
+  minDistanceFactor: 0.000001,
+  maxDistanceFactor: 0.001,
+  rotateYDeg: 90,      // keep orientation consistent
+  targetX: 0,
+  targetY: 120,
+  targetZ: 0
+};
+
+
+function getLorryCameraConfig(urlParams) {
+  const c = { ...LORRY_CAMERA_DEFAULTS };
+  const elev = parseFloat(urlParams.get('l_elev'));
+  const azim = parseFloat(urlParams.get('l_azim'));
+  const dist = parseFloat(urlParams.get('l_dist'));
+  const ry = parseFloat(urlParams.get('l_roty'));
+  const tx = parseFloat(urlParams.get('l_tx'));
+  const ty = parseFloat(urlParams.get('l_ty'));
+  const tz = parseFloat(urlParams.get('l_tz'));
+  if (!isNaN(elev)) c.elevationDeg = elev;
+  if (!isNaN(azim)) c.azimuthDeg = azim;
+  if (!isNaN(dist)) c.distanceFactor = dist;
+  if (!isNaN(ry)) c.rotateYDeg = ry;
+  if (!isNaN(tx)) c.targetX = tx;
+  if (!isNaN(ty)) c.targetY = ty;
+  if (!isNaN(tz)) c.targetZ = tz;
+  return c;
+}
 
 // === FPS Optimization ===
 let frameCount = 0, lastTime = performance.now(), avgFPS = 60;
@@ -147,7 +226,14 @@ function showModelAt(rawIndex) {
   stopAutoplay(); // ensure paused state doesn't block switching
   slider.value = String(i);
   updateModelVisibility(i);
-  updateTimelineHighlight(i);
+  try {
+    const name = loadedModels[i]?.userData?.originalName;
+    const tIdx = filenameToTimelineIndex.get(normalizeFileKey(name));
+    if (Number.isFinite(tIdx)) updateTimelineHighlight(tIdx);
+    else updateTimelineHighlight(Number.NaN);
+  } catch {
+    updateTimelineHighlight(Number.NaN);
+  }
 }
 function stopAutoplay() {
   if (autoplayTimer) {
@@ -161,7 +247,7 @@ function advanceSlider() {
   let nextVal = parseInt(slider.value) + 1;
   if (nextVal > maxVal) nextVal = 0;
   slider.value = nextVal;
-  updateModelVisibility(nextVal);
+  showModelAt(nextVal);
 }
 
 // === Navigation Buttons ===
@@ -175,7 +261,7 @@ prevButton?.addEventListener("click", () => {
   let prevVal = parseInt(slider.value) - 1;
   if (prevVal < 0) prevVal = maxVal;
   slider.value = prevVal;
-  updateModelVisibility(prevVal);
+  showModelAt(prevVal);
 });
 
 // === Autoplay ===
@@ -257,8 +343,19 @@ async function loadAllModels() {
         const box = new THREE.Box3().setFromObject(model);
         const center = box.getCenter(new THREE.Vector3());
         model.position.sub(center);
+        // For LORRY, rotate model by configured Y degrees (default 90°)
+        if (currentProject === 'LORRY') {
+          try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const cfg = getLorryCameraConfig(urlParams);
+            model.rotation.y += THREE.MathUtils.degToRad(cfg.rotateYDeg || 0);
+          } catch {}
+        }
         scene.add(model);
         loadedModels.push(model);
+        // Map normalized filename -> model index as we load
+        const key = normalizeFileKey(name);
+        if (key) filenameToModelIndex.set(key, loadedModels.length - 1);
       } catch (err) {
         console.error(`[Loader] Failed to load ${url}:`, err);
       }
@@ -271,10 +368,47 @@ async function loadAllModels() {
       const box = new THREE.Box3().setFromObject(first);
       const size = box.getSize(new THREE.Vector3());
       const maxDim = Math.max(size.x, size.y, size.z);
+      // Default camera for most projects
       camera.position.set(maxDim * 1.5, maxDim, maxDim * 1.5);
       camera.lookAt(0, 0, 0);
       controls.target.set(0, 0, 0);
       controls.update();
+
+      // Apply LORRY-specific camera and control constraints (zoom-only, top-side)
+      if (currentProject === 'LORRY') {
+        const urlParams = new URLSearchParams(window.location.search);
+        const cfg = getLorryCameraConfig(urlParams);
+        const elev = THREE.MathUtils.degToRad(cfg.elevationDeg);
+        const azim = THREE.MathUtils.degToRad(cfg.azimuthDeg);
+        const dist = Math.max(0.01, maxDim * cfg.distanceFactor);
+        const y = dist * Math.sin(elev);
+        const r = dist * Math.cos(elev);
+        const x = r * Math.cos(azim);
+        const z = r * Math.sin(azim);
+          // Set adjustable target and position camera relative to it
+          controls.target.set(cfg.targetX, cfg.targetY, cfg.targetZ);
+          camera.position.set(cfg.targetX + x, cfg.targetY + y, cfg.targetZ + z);
+          camera.lookAt(controls.target);
+        // Lock controls to zoom only
+        controls.enableRotate = false;
+        controls.enablePan = false;
+        controls.enableZoom = true;
+        controls.enableKeys = false;
+        controls.minDistance = Math.max(0.01, maxDim * cfg.minDistanceFactor);
+        controls.maxDistance = Math.max(controls.minDistance + 0.01, maxDim * cfg.maxDistanceFactor);
+        controls.update();
+        // Disable rotate button controls for LORRY
+        if (rotateButton) {
+          rotateButton.disabled = true;
+          if (orbitState.running) {
+            orbitState.running = false;
+            cancelAnimationFrame(orbitState.rafId);
+          }
+        }
+      } else {
+        // Ensure rotate button is enabled for non-LORRY projects
+        if (rotateButton) rotateButton.disabled = false;
+      }
 
       autoplayButton.disabled = false;
       loadingText.textContent = `${currentProject} models loaded successfully`;
@@ -303,11 +437,16 @@ async function loadScheduleForProject(project) {
     // Build table from schedule.json
     progressTbody.innerHTML = "";
     timelineCells = []; // reset mapping
+    timelineEvents = []; // reset events
+    filenameToTimelineIndex = new Map(); // reset filename mapping for this project
     scheduleData.forEach((item, idx) => {
       const tr = document.createElement("tr");
       // map each member to two timeline indices (fab/erec)
       const fabIdx = idx * 2;
       const ercIdx = idx * 2 + 1;
+      // Single file per date: prefer explicit 'file', else last of 'files'
+      const fabFile = (item.fabricationCompletion && (item.fabricationCompletion.file || (Array.isArray(item.fabricationCompletion.files) ? item.fabricationCompletion.files[item.fabricationCompletion.files.length - 1] : null))) || null;
+      const erecFile = (item.erectionCompletion && (item.erectionCompletion.file || (Array.isArray(item.erectionCompletion.files) ? item.erectionCompletion.files[item.erectionCompletion.files.length - 1] : null))) || null;
       const memberTd = document.createElement('td');
       memberTd.textContent = item.member;
       const fabTd = document.createElement('td');
@@ -315,40 +454,54 @@ async function loadScheduleForProject(project) {
       fabTd.dataset.index = String(fabIdx);
       fabTd.dataset.date = item.fabricationCompletion.date;
       fabTd.dataset.type = 'fab';
+      if (fabFile) fabTd.dataset.file = fabFile;
       fabTd.textContent = item.fabricationCompletion.date;
       const erecTd = document.createElement('td');
       erecTd.className = 'clickable';
       erecTd.dataset.index = String(ercIdx);
       erecTd.dataset.date = item.erectionCompletion.date;
       erecTd.dataset.type = 'erec';
+      if (erecFile) erecTd.dataset.file = erecFile;
       erecTd.textContent = item.erectionCompletion.date;
       tr.appendChild(memberTd);
       tr.appendChild(fabTd);
       tr.appendChild(erecTd);
       timelineCells.push(fabTd, erecTd);
+      // Build event objects (store note if available)
+      timelineEvents.push({ index: fabIdx, date: item.fabricationCompletion.date, type: 'fab', note: item.fabricationCompletion.note || null, member: item.member, file: fabFile });
+      timelineEvents.push({ index: ercIdx, date: item.erectionCompletion.date, type: 'erec', note: item.erectionCompletion.note || null, member: item.member, file: erecFile });
+      if (fabFile) {
+        const k = normalizeFileKey(fabFile);
+        if (k) filenameToTimelineIndex.set(k, fabIdx);
+      }
+      if (erecFile) {
+        const k = normalizeFileKey(erecFile);
+        if (k) filenameToTimelineIndex.set(k, ercIdx);
+      }
       progressTbody.appendChild(tr);
     });
 
-    // click -> just control slider + highlight (no reloads)
-    const cells = progressTbody.querySelectorAll(".clickable");
-    const highlightUpTo = (isoDateStr) => {
-      // clear all, then mark <= clicked date
-      const clickedDate = new Date(isoDateStr);
-      cells.forEach(el => {
-        const elDate = new Date(el.dataset.date);
-        if (!isNaN(elDate) && elDate <= clickedDate) el.classList.add("selected");
-        else el.classList.remove("selected");
-      });
-    };
+    buildTimelineFromEvents();
 
+    // click -> show the exact model by filename (normalized), and sync highlight
+    const cells = progressTbody.querySelectorAll(".clickable");
     cells.forEach(cell => {
       cell.addEventListener("click", (e) => {
-        const idxStr = e.currentTarget.dataset.index;
-        const dateStr = e.currentTarget.dataset.date;
-        const index = Number(idxStr);
-        if (!Number.isFinite(index)) return;
-        showModelAt(index);
-        if (dateStr) highlightUpTo(dateStr);
+        const target = e.currentTarget;
+        const idxStr = target.dataset.index;
+        const dateStr = target.dataset.date;
+        const file = target.dataset.file;
+        const timelineIndex = Number(idxStr);
+        const key = file ? normalizeFileKey(file) : null;
+        if (key && filenameToModelIndex.has(key)) {
+          const modelIndex = filenameToModelIndex.get(key);
+          showModelAt(modelIndex);
+          if (Number.isFinite(timelineIndex)) updateTimelineHighlight(timelineIndex);
+        } else if (Number.isFinite(timelineIndex)) {
+          // Fallback: original behavior
+          showModelAt(timelineIndex);
+          updateTimelineHighlight(timelineIndex);
+        }
       });
     });
 
@@ -363,9 +516,9 @@ function updateTimelineHighlight(currentIndex) {
   timelineCells.forEach(cell => {
     const idx = parseInt(cell.dataset.index, 10);
     const type = cell.dataset.type;
-    // Remove previous state classes
-    cell.classList.remove('fab-done','fab-current','erec-done','erec-current');
-    if (Number.isFinite(idx) && idx <= currentIndex) {
+    // Ensure old selection styles do not mask red/green states
+    cell.classList.remove('fab-done','fab-current','erec-done','erec-current','selected');
+    if (Number.isFinite(idx) && Number.isFinite(currentIndex) && idx <= currentIndex) {
       if (idx === currentIndex) {
         if (type === 'fab') cell.classList.add('fab-current');
         else if (type === 'erec') cell.classList.add('erec-current');
@@ -375,6 +528,54 @@ function updateTimelineHighlight(currentIndex) {
       }
     }
   });
+  updateTimelinePopup(currentIndex);
+}
+
+// Build ticks/dates from timelineEvents (override any existing generic timeline)
+function buildTimelineFromEvents() {
+  const scaleEl = document.getElementById('timeline-scale');
+  const datesEl = document.getElementById('timeline-dates');
+  if (!scaleEl || !datesEl) return;
+  scaleEl.innerHTML = '';
+  datesEl.innerHTML = '';
+  const ordered = [...timelineEvents].sort((a,b)=>a.index-b.index);
+  ordered.forEach(ev => {
+    const tick = document.createElement('div');
+    tick.className = 'tick';
+    tick.dataset.index = String(ev.index);
+    scaleEl.appendChild(tick);
+    const span = document.createElement('span');
+    try {
+      const d = new Date(ev.date);
+      if (!isNaN(d)) {
+        span.textContent = String(d.getMonth()+1).padStart(2,'0')+ '/' + String(d.getDate()).padStart(2,'0');
+      } else span.textContent = ev.date;
+    } catch { span.textContent = ev.date; }
+    datesEl.appendChild(span);
+  });
+}
+
+// Update / position popup for current timeline index
+function updateTimelinePopup(currentIndex) {
+  if (!timelinePopupEl) return;
+  const numericIndex = Number(currentIndex);
+  const ev = timelineEvents.find(e => e.index === numericIndex);
+  if (!ev) { timelinePopupEl.classList.remove('visible'); return; }
+  // Fixed top-right placement under header
+  try {
+    const header = document.getElementById('app-header');
+    const table = document.getElementById('progress-table');
+    const topPx = header ? (header.getBoundingClientRect().bottom + 8 + window.scrollY) : 90;
+    let leftPx = 30;
+    // If you want to avoid table overlap, you could adjust leftPx here
+    timelinePopupEl.style.top = topPx + 'px';
+    timelinePopupEl.style.left = leftPx + 'px';
+    timelinePopupEl.style.right = 'auto';
+  } catch {}
+  const title = ev.type === 'fab' ? 'Fabrication Complete' : 'Erection Complete';
+  const noteLine = ev.note ? ` – ${ev.note}` : '';
+  timelinePopupEl.innerHTML = `<strong>${title}</strong><br/>Member ${ev.member}${noteLine}`;
+  timelinePopupEl.classList.add('visible');
 }
 
 
