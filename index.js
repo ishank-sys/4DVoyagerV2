@@ -117,6 +117,9 @@ let timelinePopupEl = document.getElementById('timeline-popup');
 let filenameToModelIndex = new Map();
 let filenameToTimelineIndex = new Map();
 
+// Track the current timeline position (bidirectional)
+let currentTimelineIndex = Number.NaN;
+
 // Normalize filenames between schedule entries and actual files
 // Examples:
 //  - "BSGSifc-114.glb" -> "ifc-114"
@@ -220,19 +223,28 @@ function updateModelVisibility(index) {
   }
 }
 // Unified helper: always load model at index (even when autoplay paused)
-function showModelAt(rawIndex) {
+function showModelAt(rawIndex, fromAutoplay = false) {
   if (!loadedModels.length) return;
   const i = Math.max(0, Math.min(parseInt(rawIndex, 10) || 0, loadedModels.length - 1));
-  stopAutoplay(); // ensure paused state doesn't block switching
+  if (!fromAutoplay) stopAutoplay(); // only stop autoplay for manual interactions
   slider.value = String(i);
   updateModelVisibility(i);
   try {
     const name = loadedModels[i]?.userData?.originalName;
     const tIdx = filenameToTimelineIndex.get(normalizeFileKey(name));
-    if (Number.isFinite(tIdx)) updateTimelineHighlight(tIdx);
-    else updateTimelineHighlight(Number.NaN);
+    if (Number.isFinite(tIdx)) {
+      currentTimelineIndex = tIdx;
+      updateTimelineHighlight(tIdx);
+    } else {
+      // Model doesn't map to event - keep showing highlights up to currentTimelineIndex
+      if (Number.isFinite(currentTimelineIndex)) {
+        updateTimelineHighlight(currentTimelineIndex);
+      }
+    }
   } catch {
-    updateTimelineHighlight(Number.NaN);
+    if (Number.isFinite(currentTimelineIndex)) {
+      updateTimelineHighlight(currentTimelineIndex);
+    }
   }
 }
 function stopAutoplay() {
@@ -247,7 +259,7 @@ function advanceSlider() {
   let nextVal = parseInt(slider.value) + 1;
   if (nextVal > maxVal) nextVal = 0;
   slider.value = nextVal;
-  showModelAt(nextVal);
+  showModelAt(nextVal, true); // pass true to indicate this is from autoplay
 }
 
 // === Navigation Buttons ===
@@ -496,10 +508,14 @@ async function loadScheduleForProject(project) {
         if (key && filenameToModelIndex.has(key)) {
           const modelIndex = filenameToModelIndex.get(key);
           showModelAt(modelIndex);
-          if (Number.isFinite(timelineIndex)) updateTimelineHighlight(timelineIndex);
+          if (Number.isFinite(timelineIndex)) {
+            currentTimelineIndex = timelineIndex;
+            updateTimelineHighlight(timelineIndex);
+          }
         } else if (Number.isFinite(timelineIndex)) {
           // Fallback: original behavior
           showModelAt(timelineIndex);
+          currentTimelineIndex = timelineIndex;
           updateTimelineHighlight(timelineIndex);
         }
       });
@@ -518,16 +534,32 @@ function updateTimelineHighlight(currentIndex) {
     const type = cell.dataset.type;
     // Ensure old selection styles do not mask red/green states
     cell.classList.remove('fab-done','fab-current','erec-done','erec-current','selected');
-    if (Number.isFinite(idx) && Number.isFinite(currentIndex) && idx <= currentIndex) {
-      if (idx === currentIndex) {
-        if (type === 'fab') cell.classList.add('fab-current');
-        else if (type === 'erec') cell.classList.add('erec-current');
-      } else {
-        if (type === 'fab') cell.classList.add('fab-done');
-        else if (type === 'erec') cell.classList.add('erec-done');
+    if (Number.isFinite(idx) && Number.isFinite(currentIndex)) {
+      // Show all events up to and including current
+      if (idx <= currentIndex) {
+        if (idx === currentIndex) {
+          if (type === 'fab') cell.classList.add('fab-current');
+          else if (type === 'erec') cell.classList.add('erec-current');
+        } else {
+          if (type === 'fab') cell.classList.add('fab-done');
+          else if (type === 'erec') cell.classList.add('erec-done');
+        }
       }
     }
   });
+  // Also move the table to keep the current row in view and mark it active
+  try {
+    const container = document.querySelector('#progress-table .table-container');
+    const currentCell = timelineCells.find(c => parseInt(c.dataset.index, 10) === Number(currentIndex));
+    if (container && currentCell) {
+      const row = currentCell.parentElement;
+      // Clear any previous active row
+      const allRows = container.querySelectorAll('tr');
+      allRows.forEach(r => r.classList.remove('active'));
+      row.classList.add('active');
+      row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  } catch {}
   updateTimelinePopup(currentIndex);
 }
 
@@ -539,10 +571,25 @@ function buildTimelineFromEvents() {
   scaleEl.innerHTML = '';
   datesEl.innerHTML = '';
   const ordered = [...timelineEvents].sort((a,b)=>a.index-b.index);
+  const handleClick = (ev) => {
+    // Prefer exact file mapping, else just update highlight to this event
+    const key = ev.file ? normalizeFileKey(ev.file) : null;
+    if (key && filenameToModelIndex.has(key)) {
+      const modelIndex = filenameToModelIndex.get(key);
+      showModelAt(modelIndex);
+      currentTimelineIndex = ev.index;
+      updateTimelineHighlight(ev.index);
+    } else {
+      currentTimelineIndex = ev.index;
+      updateTimelineHighlight(ev.index);
+    }
+  };
   ordered.forEach(ev => {
     const tick = document.createElement('div');
     tick.className = 'tick';
     tick.dataset.index = String(ev.index);
+    tick.style.cursor = 'pointer';
+    tick.addEventListener('click', () => handleClick(ev));
     scaleEl.appendChild(tick);
     const span = document.createElement('span');
     try {
@@ -551,6 +598,8 @@ function buildTimelineFromEvents() {
         span.textContent = String(d.getMonth()+1).padStart(2,'0')+ '/' + String(d.getDate()).padStart(2,'0');
       } else span.textContent = ev.date;
     } catch { span.textContent = ev.date; }
+    span.style.cursor = 'pointer';
+    span.addEventListener('click', () => handleClick(ev));
     datesEl.appendChild(span);
   });
 }
