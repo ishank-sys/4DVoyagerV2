@@ -1,1 +1,7 @@
 node_modules/
+
+# GLB model files - too large for Git
+*.glb
+*.gltf
+public/*/FromTeklaStructures-*.glb
+public/*/scene.glb
