@@ -4,13 +4,13 @@
     "fabricationCompletion": {
       "files": ["BSGSifc-1.glb","BSGSifc-2.glb","BSGSifc-3.glb"],
       "file": "BSGSifc-2.glb",
-      "date": "2026-01-01",
+      "date": "2026-10-01",
       "note": "Foundation Embeds Fabricated"
     },
     "erectionCompletion": {
       "files": ["BSGSifc-1.glb","BSGSifc-2.glb","BSGSifc-3.glb"],
       "file": "BSGSifc-35.glb",
-      "date": "2026-01-03",
+      "date": "2026-11-11",
       "note": "Foundation Embeds Erected"
     }
   },
@@ -19,13 +19,13 @@
     "fabricationCompletion": {
       "files": ["BSGSifc-1.glb","BSGSifc-2.glb","BSGSifc-3.glb"],
       "file": "BSGSifc-3.glb",
-      "date": "2026-01-05",
+      "date": "2026-10-05",
       "note": "ABs of Phase 3A Fabricated"
     },
     "erectionCompletion": {
       "files": ["BSGSifc-1.glb","BSGSifc-2.glb","BSGSifc-3.glb"],
       "file": "BSGSifc-35.glb",
-      "date": "2026-01-07",
+      "date": "2026-11-11",
       "note": "ABs of Phase 3A Erected"
     }
   },
@@ -34,13 +34,13 @@
     "fabricationCompletion": {
       "files": ["BSGSifc-1.glb","BSGSifc-2.glb","BSGSifc-3.glb"],
       "file": "BSGSifc-7.glb",
-      "date": "2026-01-08",
+      "date": "2026-10-11",
       "note": "ABs of Phase 3B Fabricated"
     },
     "erectionCompletion": {
       "files": ["BSGSifc-1.glb","BSGSifc-2.glb","BSGSifc-3.glb"],
       "file": "BSGSifc-35.glb",
-      "date": "2026-01-10",
+      "date": "2026-11-11",
       "note": "ABs of Phase 3B Erected"
     }
   },
@@ -49,13 +49,13 @@
     "fabricationCompletion": {
       "files": ["BSGSifc-1.glb","BSGSifc-2.glb","BSGSifc-3.glb"],
       "file": "BSGSifc-13.glb",
-      "date": "2026-01-11",
+      "date": "2026-10-17",
       "note": "ABs of Phase 3B Fabricated"
     },
     "erectionCompletion": {
       "files": ["BSGSifc-1.glb","BSGSifc-2.glb","BSGSifc-3.glb"],
       "file": "BSGSifc-35.glb",
-      "date": "2026-01-13",
+      "date": "2026-11-11",
       "note": "ABs of Phase 3B Erected"
     }
   },
@@ -64,13 +64,13 @@
     "fabricationCompletion": {
       "files": ["BSGSifc-1.glb","BSGSifc-2.glb","BSGSifc-3.glb"],
       "file": "BSGSifc-23.glb",
-      "date": "2026-01-14",
+      "date": "2026-10-30",
       "note": "ABs of Phase 3B Fabricated"
     },
     "erectionCompletion": {
       "files": ["BSGSifc-1.glb","BSGSifc-2.glb","BSGSifc-3.glb"],
       "file": "BSGSifc-35.glb",
-      "date": "2026-01-16",
+      "date": "2026-11-11",
       "note": "ABs of Phase 3B Erected"
     }
   },
@@ -79,13 +79,13 @@
     "fabricationCompletion": {
       "files": ["BSGSifc-1.glb","BSGSifc-2.glb","BSGSifc-3.glb"],
       "file": "BSGSifc-16.glb",
-      "date": "2026-01-18",
+      "date": "2026-10-21",
       "note": "Phase 3A Fabricated"
     },
     "erectionCompletion": {
       "files": ["BSGSifc-1.glb","BSGSifc-2.glb","BSGSifc-3.glb"],
       "file": "BSGSifc-83.glb",
-      "date": "2026-01-20",
+      "date": "2027-02-04",
       "note": "Phase 3A Erected"
     }
   },
@@ -94,13 +94,13 @@
     "fabricationCompletion": {
       "files": ["BSGSifc-1.glb","BSGSifc-2.glb","BSGSifc-3.glb"],
       "file": "BSGSifc-31.glb",
-      "date": "2026-01-22",
+      "date": "2026-11-07",
       "note": "Phase 3B Fabricated"
     },
     "erectionCompletion": {
       "files": ["BSGSifc-1.glb","BSGSifc-2.glb","BSGSifc-3.glb"],
       "file": "BSGSifc-91.glb",
-      "date": "2026-01-24",
+      "date": "2027-02-13",
       "note": "Phase 3B Erected"
     }
   },
@@ -109,13 +109,13 @@
     "fabricationCompletion": {
       "files": ["BSGSifc-1.glb","BSGSifc-2.glb","BSGSifc-3.glb"],
       "file": "BSGSifc-48.glb",
-      "date": "2026-01-26",
+      "date": "2026-11-24",
       "note": "Phase 3C Fabricated"
     },
     "erectionCompletion": {
       "files": ["BSGSifc-1.glb","BSGSifc-2.glb","BSGSifc-3.glb"],
       "file": "BSGSifc-100.glb",
-      "date": "2026-01-28",
+      "date": "2027-02-22",
       "note": "Phase 3C Erected"
     }
   },
@@ -124,13 +124,13 @@
     "fabricationCompletion": {
       "files": ["BSGSifc-1.glb","BSGSifc-2.glb","BSGSifc-3.glb"],
       "file": "BSGSifc-77.glb",
-      "date": "2026-01-30",
+      "date": "2026-12-24",
       "note": "Phase 3D Fabricated"
     },
     "erectionCompletion": {
       "files": ["BSGSifc-1.glb","BSGSifc-2.glb","BSGSifc-3.glb"],
       "file": "BSGSifc-114.glb",
-      "date": "2026-02-01",
+      "date": "2027-03-08",
       "note": "Phase 3D Erected"
     }
   }
