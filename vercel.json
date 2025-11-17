@@ -4,8 +4,8 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "env": {
-    "GCS_BUCKET_URL": "https://storage.googleapis.com/your-bucket-name",
-    "GCS_BUCKET_NAME": "your-bucket-name"
+    "GCS_BUCKET_URL": "https://storage.googleapis.com/4dvoyager",
+    "GCS_BUCKET_NAME": "4dvoyager"
   },
   "headers": [
     {

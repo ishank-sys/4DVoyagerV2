@@ -5,6 +5,7 @@
 This setup uses **temporary signed URLs** to load GLB files from a **private GCS bucket**. This works even with organization policies that restrict public access.
 
 ### How It Works:
+
 1. Bucket remains **private** (no public access needed)
 2. Script generates **signed URLs** valid for 7 days
 3. Your app loads models using these temporary URLs
@@ -50,6 +51,7 @@ npm run dev
 ```
 
 Open browser and test:
+
 - http://localhost:5173/viewer.html?project=BSGS
 - http://localhost:5173/viewer.html?project=LORRY
 - Check console for errors
@@ -137,11 +139,13 @@ Open `public/signed-urls.json` to see when URLs expire:
 ## 🆘 Troubleshooting
 
 **Error: "signed-urls.json not found"**
+
 ```powershell
 npm run gcs:generate-urls
 ```
 
 **Error: "Signed URLs have expired"**
+
 ```powershell
 npm run gcs:generate-urls
 git add public/signed-urls.json
@@ -150,11 +154,13 @@ git push
 ```
 
 **Error: "Authentication failed"**
+
 ```powershell
 gcloud auth application-default login
 ```
 
 **Check if files exist in bucket:**
+
 ```powershell
 gsutil ls gs://4dvoyager/BSGS/
 ```
@@ -189,31 +195,31 @@ name: Regenerate Signed URLs
 
 on:
   schedule:
-    - cron: '0 0 */6 * *'  # Every 6 days
-  workflow_dispatch:        # Manual trigger
+    - cron: "0 0 */6 * *" # Every 6 days
+  workflow_dispatch: # Manual trigger
 
 jobs:
   regenerate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
-      
+          node-version: "18"
+
       - name: Install dependencies
         run: npm install
-      
+
       - name: Setup GCP Auth
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
-      
+
       - name: Generate signed URLs
         run: npm run gcs:generate-urls
-      
+
       - name: Commit and push
         run: |
           git config user.name "GitHub Actions"
@@ -230,12 +236,14 @@ Add `GCP_SA_KEY` secret in GitHub repository settings.
 ## 🎯 Summary
 
 **Your bucket is now PRIVATE** ✅
+
 - No public access required
 - Works with strict org policies
 - Signed URLs provide temporary access
 - Must regenerate every 7 days
 
 **Quick reminder:**
+
 ```powershell
 npm run gcs:generate-urls  # Every 6 days
 git push                   # Deploy new URLs
