@@ -4,9 +4,18 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "gcs:setup": "node scripts/quick-setup.js",
+    "gcs:generate-urls": "node scripts/generate-signed-urls.js",
+    "gcs:upload": "node scripts/upload-to-gcs.js",
+    "gcs:update-models": "node scripts/update-models-json.js",
+    "gcs:restore-models": "node scripts/update-models-json.js --restore",
+    "gcs:cors": "node scripts/enable-cors.js",
+    "gcs:verify": "node scripts/verify-setup.js",
+    "gcs:migrate": "powershell -ExecutionPolicy Bypass -File ./scripts/migrate-to-gcs.ps1"
   },
   "dependencies": {
+    "@google-cloud/storage": "^7.17.3",
     "three": "^0.148.0"
   },
   "devDependencies": {

@@ -334,19 +334,34 @@ async function loadAllModels() {
     const urlParams = new URLSearchParams(window.location.search);
     currentProject = (urlParams.get("project") || "BSGS").toUpperCase();
     const base = currentProject;
-    const manifestUrl = `/${base}/models.json`;
-
-    const res = await fetch(manifestUrl, { cache: "no-cache" });
-    if (!res.ok) throw new Error(`Missing or invalid models.json in ${base}`);
-    const names = await res.json();
-    if (!Array.isArray(names) || names.length === 0) throw new Error(`models.json in ${base} is empty.`);
+    
+    // Load signed URLs
+    const signedUrlsRes = await fetch('/signed-urls.json', { cache: "no-cache" });
+    if (!signedUrlsRes.ok) throw new Error('signed-urls.json not found. Run: npm run gcs:generate-urls');
+    const signedUrlsData = await signedUrlsRes.json();
+    
+    // Check if URLs are expired
+    const expiresAt = new Date(signedUrlsData.expiresAt);
+    if (Date.now() > expiresAt.getTime()) {
+      throw new Error('Signed URLs have expired. Run: npm run gcs:generate-urls');
+    }
+    
+    const urls = signedUrlsData.urls[base];
+    if (!urls || urls.length === 0) {
+      throw new Error(`No signed URLs found for ${base}`);
+    }
 
     loadedModels = [];
-    for (let i = 0; i < names.length; i++) {
-      const name = names[i];
-      const url = `/${base}/${encodeURIComponent(name)}`;
+    for (let i = 0; i < urls.length; i++) {
+      const url = urls[i];
+      if (!url) continue; // Skip null URLs
+      
+      // Extract filename from signed URL for display
+      const urlObj = new URL(url);
+      const name = decodeURIComponent(urlObj.pathname.split('/').pop());
+      
       try {
-        loadingText.textContent = `Loading ${currentProject} models... ${Math.round(((i + 1) / names.length) * 100)}%`;
+        loadingText.textContent = `Loading ${currentProject} models... ${Math.round(((i + 1) / urls.length) * 100)}%`;
         const gltf = await loader.loadAsync(url);
         const model = gltf.scene;
         optimizeModel(model);
